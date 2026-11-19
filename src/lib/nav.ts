@@ -37,7 +37,6 @@ export const NAV: NavGroup[] = [
     label: "Overview",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: "dashboard", roles: ["admin", "programme_manager", "project_coordinator", "mel_officer"] },
-      { label: "Budget summary", href: "/dashboard/finance", icon: "wallet", roles: ["admin", "finance"] },
       { label: "My home", href: "/home", icon: "home", roles: ["field_staff", "data_entry"] },
     ],
   },

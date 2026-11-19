@@ -139,9 +139,6 @@ export default async function DashboardPage({
             <div className="card-head">
               <Icon name="wallet" size={14} />
               <span id="budget-title">Project-wise approved budget</span>
-              <Link className="card-link" href="/dashboard/finance">
-                Budget summary
-              </Link>
             </div>
             <div className="budget-card">
               <span className="budget-amount">{formatCurrencyCompact(data.budget.approved)}</span>

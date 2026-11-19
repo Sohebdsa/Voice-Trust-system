@@ -273,6 +273,5 @@ export async function recordDisbursement(formData: FormData) {
   revalidatePath(`/donors/${donorId}`);
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/dashboard");
-  revalidatePath("/dashboard/finance");
   redirect(`/donors/${donorId}?disbursed=1`);
 }

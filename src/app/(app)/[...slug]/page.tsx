@@ -5,7 +5,7 @@ import { requireSession } from "@/lib/session";
 
 /**
  * Placeholder for modules built in later steps. Static routes win over this
- * catch-all, so /dashboard, /dashboard/finance and /home keep their real pages
+ * catch-all, so /dashboard and /home keep their real pages
  * while every nav item stays clickable during the demo.
  */
 const MODULES: Record<string, { title: string; step: number; prd: string; summary: string }> = {
