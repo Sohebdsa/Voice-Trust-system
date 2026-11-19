@@ -154,7 +154,7 @@ export default async function ActivitiesPage({
         subtitle={`${result.total} activities · PRD §7.7`}
         action={
           canWrite
-            ? { label: "+ Log activity", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
+            ? { label: "Log activity", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
             : undefined
         }
       />

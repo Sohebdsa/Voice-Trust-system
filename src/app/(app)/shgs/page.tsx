@@ -115,7 +115,7 @@ export default async function ShgsPage({
         subtitle={`${result.total} Self-Help Groups · Women's Livelihood & Savings`}
         action={
           canCreateShg(profile.role)
-            ? { label: "+ Form new SHG", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
+            ? { label: "Form new SHG", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
             : undefined
         }
       />
@@ -162,7 +162,7 @@ export default async function ShgsPage({
               <EmptyState
                 title="No SHGs found"
                 body="Form your first self-help group to organize women's savings and enterprise activities."
-                actionLabel={canCreateShg(profile.role) ? "+ Form new SHG" : undefined}
+                actionLabel={canCreateShg(profile.role) ? "Form new SHG" : undefined}
                 actionHref={canCreateShg(profile.role) ? `${base}${base.includes("?") ? "&" : "?"}form=new` : undefined}
               />
             }

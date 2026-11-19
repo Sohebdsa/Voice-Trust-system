@@ -1,6 +1,6 @@
 import { db } from "../data/store";
 import type { Profile } from "../data/types";
-import { currentFinancialYear, delta, fyStart, isWithin, pct } from "../format";
+import { currentFinancialYear, delta, formatDate, fyStart, isWithin, pct } from "../format";
 import { scopeForRole, type Scope } from "../rbac";
 
 export type Kpi = {
@@ -14,7 +14,7 @@ export type Kpi = {
 
 export type MonthlyPoint = { label: string; planned: number; completed: number };
 
-export type RangeKey = "month" | "quarter" | "fy";
+export type RangeKey = "month" | "quarter" | "fy" | "custom";
 
 /** Quick filters required by Part B of the source data-structure document. */
 export type DashboardFilters = {
@@ -24,6 +24,9 @@ export type DashboardFilters = {
   district: string | null;
   block: string | null;
   villageId: string | null;
+  /** YYYY-MM-DD bounds, used only when range is "custom". */
+  from: string | null;
+  to: string | null;
 };
 
 export const DEFAULT_FILTERS: DashboardFilters = {
@@ -33,6 +36,8 @@ export const DEFAULT_FILTERS: DashboardFilters = {
   district: null,
   block: null,
   villageId: null,
+  from: null,
+  to: null,
 };
 
 export type BarRow = { key: string; label: string; count: number; percent: number; share?: number };
@@ -71,17 +76,37 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     return single && single !== "all" ? single : null;
   };
   const range = read("range");
+  const readDate = (key: string) => {
+    const value = read(key);
+    return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+  };
   return {
-    range: range === "month" || range === "quarter" ? range : "fy",
+    range: range === "month" || range === "quarter" || range === "custom" ? range : "fy",
     programmeId: read("programme"),
     projectId: read("project"),
     district: read("district"),
     block: read("block"),
     villageId: read("village"),
+    from: readDate("from"),
+    to: readDate("to"),
   };
 }
 
-export function resolveRange(range: RangeKey, now: Date = new Date()) {
+export function resolveRange(
+  range: RangeKey,
+  from: string | null = null,
+  to: string | null = null,
+  now: Date = new Date(),
+) {
+  if (range === "custom") {
+    const start = from ? new Date(`${from}T00:00:00`) : null;
+    const end = to ? new Date(`${to}T23:59:59`) : null;
+    if (start && end && !Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+      const [a, b] = start <= end ? [start, end] : [end, start];
+      return { from: a, to: b, label: `Custom · ${formatDate(a)} – ${formatDate(b)}` };
+    }
+    /* Incomplete custom dates fall back to the financial year. */
+  }
   if (range === "month") {
     const from = new Date(now.getFullYear(), now.getMonth(), 1);
     return { from, to: now, label: `This month · ${now.toLocaleString("en-IN", { month: "long", year: "numeric" })}` };
@@ -190,7 +215,7 @@ export function getDashboardData(
   filters: DashboardFilters = DEFAULT_FILTERS,
 ): DashboardData {
   const scope = scopeForRole(profile.id, profile.role);
-  const range = resolveRange(filters.range);
+  const range = resolveRange(filters.range, filters.from, filters.to);
 
   /* Geography narrowing: district → block → village. */
   const allowedVillages = new Set(
@@ -257,11 +282,11 @@ export function getDashboardData(
 
   /* Profiles: a person can hold more than one (source doc B1, PRD §8.2). */
   const beneficiaryIds = new Set(beneficiaries.map((b) => b.id));
-  const farmers = db.farmers.filter((f) => beneficiaryIds.has(f.beneficiaryId));
-  const pwd = db.pwdProfiles.filter((p) => beneficiaryIds.has(p.beneficiaryId));
+  const farmers = db.farmers.filter((f) => beneficiaryIds.has(f.beneficiaryId) && f.status === "active");
+  const pwd = db.pwdProfiles.filter((p) => beneficiaryIds.has(p.beneficiaryId) && p.status === "active");
   const shgMembers = db.shgMembers.filter((m) => beneficiaryIds.has(m.beneficiaryId) && m.status === "active");
   const shgIds = new Set(shgMembers.map((m) => m.shgId));
-  const shgs = db.shgs.filter((s) => shgIds.has(s.id));
+  const shgs = db.shgs.filter((s) => shgIds.has(s.id) && s.status === "active");
   const activeBeneficiaries = beneficiaries.filter((b) => b.status === "active");
   const totalBeneficiaries = activeBeneficiaries.length;
 
@@ -273,6 +298,9 @@ export function getDashboardData(
 
   const trainings = rangeActivities.filter(
     (a) => a.activityType === "training" && a.status === "completed",
+  ).length;
+  const trainingsPlanned = rangeActivities.filter(
+    (a) => a.activityType === "training" && a.status === "planned",
   ).length;
 
   const kpi: Kpi[] = [
@@ -328,9 +356,9 @@ export function getDashboardData(
       label: "Trainings conducted",
       value: trainings,
       trend: "flat",
-      deltaLabel: `${rangeActivities.length} activities`,
+      deltaLabel: `${trainingsPlanned} planned`,
       href: "/activities?type=training",
-      hint: "Completed training activities",
+      hint: "Completed trainings · planned shown as delta",
     },
     {
       label: "Villages covered",

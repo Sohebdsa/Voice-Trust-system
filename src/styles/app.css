@@ -1367,6 +1367,22 @@ ul {
   flex: none;
   display: inline-block;
 }
+.filter-date {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--ink);
+  padding: 0;
+  margin: 0;
+  height: 14px;
+  cursor: pointer;
+}
+.filter-date:focus-visible {
+  outline: none;
+}
 
 /* ---------- Select (plain CSS, no deps) ----------
    Styled native <select> so it is keyboard-accessible by default.

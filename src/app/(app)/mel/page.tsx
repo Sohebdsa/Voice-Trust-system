@@ -156,7 +156,7 @@ export default async function MelPage({
         subtitle={`${result.total} indicators · PRD §7.8`}
         action={
           canWrite
-            ? { label: "+ New indicator", href: `/mel${buildQuery({ ...filters, form: "new" })}` }
+            ? { label: "New indicator", href: `/mel${buildQuery({ ...filters, form: "new" })}` }
             : undefined
         }
       />

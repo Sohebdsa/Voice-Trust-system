@@ -184,7 +184,7 @@ export default async function PwdPage({
         }
         action={
           canCreatePwd(profile.role)
-            ? { label: "+ Add PWD profile", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
+            ? { label: "Add PWD profile", href: `${base}${base.includes("?") ? "&" : "?"}form=new` }
             : undefined
         }
       />

@@ -19,6 +19,8 @@ export const DASHBOARD_FILTER_PARAM_MAP: Record<keyof DashboardFilters, string> 
   district: "district",
   block: "block",
   villageId: "village",
+  from: "from",
+  to: "to",
 };
 
 /**
@@ -49,6 +51,21 @@ export function DashboardFiltersBar({
       params.delete("village");
     }
     if (key === "block") params.delete("village");
+
+    // Custom dates only exist for a custom range; seed them from the FY.
+    if (key === "range") {
+      if (value === "custom") {
+        if (!params.get("from") || !params.get("to")) {
+          const today = new Date();
+          const fyYear = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+          params.set("from", `${fyYear}-04-01`);
+          params.set("to", `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`);
+        }
+      } else {
+        params.delete("from");
+        params.delete("to");
+      }
+    }
 
     const query = params.toString();
     router.push(query ? `/dashboard?${query}` : "/dashboard", { scroll: false });
@@ -92,7 +109,15 @@ export function DashboardFiltersBar({
 
   const dirty =
     filters.range !== "fy" ||
-    Boolean(filters.programmeId || filters.projectId || filters.district || filters.block || filters.villageId);
+    Boolean(
+      filters.programmeId ||
+        filters.projectId ||
+        filters.district ||
+        filters.block ||
+        filters.villageId ||
+        filters.from ||
+        filters.to,
+    );
 
   return (
     <div className="filterbar" role="group" aria-label="Dashboard filters">
@@ -104,9 +129,36 @@ export function DashboardFiltersBar({
           { value: "month", label: "This month" },
           { value: "quarter", label: "This quarter" },
           { value: "fy", label: "This FY" },
+          { value: "custom", label: "Custom dates" },
         ],
         "This FY",
       )}
+      {filters.range === "custom" ? (
+        <>
+          <label className="filter-field">
+            <span className="filter-field-label">From</span>
+            <input
+              className="filter-date"
+              type="date"
+              value={filters.from ?? ""}
+              max={filters.to ?? undefined}
+              onChange={(event) => update("from", event.target.value)}
+              aria-label="From date"
+            />
+          </label>
+          <label className="filter-field">
+            <span className="filter-field-label">To</span>
+            <input
+              className="filter-date"
+              type="date"
+              value={filters.to ?? ""}
+              min={filters.from ?? undefined}
+              onChange={(event) => update("to", event.target.value)}
+              aria-label="To date"
+            />
+          </label>
+        </>
+      ) : null}
       {field(
         "Programme",
         "programmeId",
