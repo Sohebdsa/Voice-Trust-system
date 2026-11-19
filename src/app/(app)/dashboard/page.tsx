@@ -55,7 +55,15 @@ export default async function DashboardPage({
       <Topbar
         name={profile.fullName}
         subtitle={`${roleLabel(profile.role)} · ${data.scopeLabel} · ${data.rangeLabel}`}
-        action={{ label: "Add beneficiary", href: "/beneficiaries/new" }}
+        menu={{
+          label: "Quick action",
+          items: [
+            { label: "Add beneficiary", href: "/beneficiaries?form=new", icon: "people" },
+            { label: "Log activity", href: "/activities?form=new", icon: "activity" },
+            { label: "Form new SHG", href: "/shgs?form=new", icon: "group" },
+            { label: "Add PWD profile", href: "/pwd?form=new", icon: "accessibility" },
+          ],
+        }}
         secondary={
           <a className="btn" href={exportHref(filters)} download>
             <Icon name="download" size={14} /> Export

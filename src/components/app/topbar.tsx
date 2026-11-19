@@ -2,17 +2,20 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Icon } from "@/components/ui/icons";
 import { InboxToggle } from "./inbox-toggle";
+import { QuickActions, type QuickAction } from "./quick-actions";
 import { greetingFor } from "@/lib/format";
 
 export function Topbar({
   name,
   subtitle,
   action,
+  menu,
   secondary,
 }: {
   name: string;
   subtitle?: string;
   action?: { label: string; href: string; icon?: string };
+  menu?: { label: string; items: QuickAction[] };
   secondary?: ReactNode;
 }) {
   return (
@@ -27,7 +30,9 @@ export function Topbar({
           <Icon name="search" size={15} />
         </button>
         {secondary}
-        {action ? (
+        {menu ? (
+          <QuickActions label={menu.label} items={menu.items} />
+        ) : action ? (
           <Link className="btn btn-primary" href={action.href}>
             <Icon name="plus" size={14} />
             {action.label}

@@ -1109,6 +1109,58 @@ ul {
   block-size: 100%;
 }
 
+/* ---------- Top-bar quick actions ---------- */
+.quick-menu[popover] {
+  margin: 0;
+  /* Under the top bar, right-aligned with the trigger it grows out of. */
+  inset: 62px var(--s-4) auto auto;
+  inline-size: 220px;
+  padding: 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  background: var(--paper);
+  box-shadow: 0 12px 32px rgba(15, 15, 25, 0.14);
+  transform-origin: top right;
+  opacity: 0;
+  scale: 0.92;
+  transition:
+    opacity 0.15s,
+    scale 0.15s,
+    display 0.15s,
+    overlay 0.15s;
+  transition-behavior: allow-discrete;
+}
+.quick-menu[popover]:popover-open {
+  opacity: 1;
+  scale: 1;
+  transition-duration: 0.12s;
+}
+/* A closed popover is display:none, so the open transition needs its from-values. */
+@starting-style {
+  .quick-menu[popover]:popover-open {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+.quick-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 9px 10px;
+  border-radius: var(--r-control);
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--ink);
+}
+.quick-menu-item:hover {
+  background: var(--panel);
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-menu[popover] {
+    transition: none;
+  }
+}
+
 /* ---------- Dashboard extras ---------- */
 .budget-card {
   display: flex;
