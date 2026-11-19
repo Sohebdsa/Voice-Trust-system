@@ -1,5 +1,5 @@
 import { db } from "../data/store";
-import type { Donor, Employee, Programme, Project, Profile, Village } from "../data/types";
+import type { Donor, Programme, Project, Profile, Village } from "../data/types";
 import { formatCurrency, formatDate, pct } from "../format";
 import { PAGE_SIZE, type MasterEntity, type MasterValues } from "../masters";
 import { scopeForRole } from "../rbac";
@@ -462,16 +462,6 @@ export function programmeDetail(programme: Programme, profile: Profile) {
   const activities = db.activities
     .filter((a) => a.programmeId === programme.id)
     .sort((a, b) => b.startDate.localeCompare(a.startDate));
-  const teamIds = new Set(
-    db.projectAllocations.filter((a) => projectIds.includes(a.projectId)).map((a) => a.employeeId),
-  );
-  const team = [...teamIds].map((id) => {
-    const employee = db.employees.find((e) => e.id === id) as Employee;
-    const pctTotal = db.projectAllocations
-      .filter((a) => a.employeeId === id && projectIds.includes(a.projectId))
-      .reduce((sum, a) => sum + a.allocationPct, 0);
-    return { id, name: employee.fullName, designation: employee.designation, pctTotal };
-  });
   return {
     facts: programmeFacts(programme, coordinator),
     projects,
@@ -482,7 +472,6 @@ export function programmeDetail(programme: Programme, profile: Profile) {
       date: formatDate(a.startDate),
       status: a.status,
     })),
-    team,
     beneficiaries: projects.reduce((sum, row) => sum + row.beneficiaries, 0),
   };
 }
@@ -534,19 +523,6 @@ export function projectDetail(project: Project, profile: Profile) {
       };
     });
 
-  const team = db.projectAllocations
-    .filter((a) => a.projectId === project.id)
-    .map((a) => {
-      const employee = db.employees.find((e) => e.id === a.employeeId);
-      return {
-        id: a.employeeId,
-        name: employee?.fullName ?? "—",
-        designation: employee?.designation ?? "—",
-        allocationPct: a.allocationPct,
-        fromDate: formatDate(a.fromDate),
-      };
-    });
-
   const donor = db.donors.find((d) => d.id === project.donorId);
   const rawDisbursements = (db.donorDisbursements ?? []).filter((d) => d.projectId === project.id);
   const disbursements = rawDisbursements
@@ -566,7 +542,6 @@ export function projectDetail(project: Project, profile: Profile) {
     beneficiaryTotal: beneficiariesInProject(project.id),
     activities,
     indicators,
-    team,
     donor,
     disbursements,
     totalDisbursed,

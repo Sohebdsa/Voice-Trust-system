@@ -147,10 +147,6 @@ export function getInbox(profile: Profile): DashboardData["inbox"] {
   beneficiaries.forEach((b) => duplicateGroups.set(b.mobile, (duplicateGroups.get(b.mobile) ?? 0) + 1));
   const duplicates = [...duplicateGroups.values()].filter((count) => count > 1).length;
 
-  const canApproveLeave =
-    profile.role === "admin" || profile.role === "programme_manager" || profile.role === "hr_admin";
-  const leavePending = canApproveLeave ? db.leaveRequests.filter((r) => r.status === "pending").length : 0;
-
   const indicatorDue = db.indicators.filter((indicator) => {
     if (!projects.includes(indicator.projectId)) return false;
     const latest = db.indicatorValues
@@ -163,14 +159,6 @@ export function getInbox(profile: Profile): DashboardData["inbox"] {
   const canSeeBeneficiaries = ["admin", "programme_manager", "project_coordinator", "mel_officer", "field_staff", "data_entry"].includes(profile.role);
 
   return [
-    {
-      key: "leave",
-      title: `${leavePending} leave requests`,
-      detail: "Waiting for your approval",
-      href: "/leave?status=pending",
-      count: leavePending,
-      icon: "calendar",
-    },
     // IG-08: Only show to roles that can read the beneficiaries page
     ...(canSeeBeneficiaries ? [{
       key: "duplicates",

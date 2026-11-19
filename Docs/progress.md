@@ -293,3 +293,19 @@ Verified: `npm run typecheck` clean (0 errors), HTTP route checks 200 OK.
 ## Next
 
 Step 5 — Activities with participant attendance (bulk add by village), calendar toggle, attachments UI, and derived gender participation counts.
+
+## Step 5 - Activities Module - DONE
+
+Files created:
+- src/lib/queries/activities.ts - listActivities, getActivity, availableBeneficiaries, nextActivityId
+- src/app/actions/activities.ts - saveActivity, addParticipant, bulkAddByVillage, toggleAttendance, removeParticipant
+- src/app/(app)/activities/page.tsx - list page with filter bar + drawer form
+- src/app/(app)/activities/[id]/page.tsx - detail page: Overview + Participants tabs
+- src/components/app/activity-form.tsx - client form with programme auto-fill
+- src/components/app/participants-panel.tsx - attendance toggle, single-add, bulk-add by village
+
+Verified: tsc 0 errors, HTTP 200 for admin/field_staff, 307 for finance/hr_admin.
+
+## Next
+
+Step 6 - MEL indicators.

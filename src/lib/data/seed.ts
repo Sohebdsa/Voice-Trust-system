@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import type {
   Activity,
+  ActivityAttachment,
   ActivityParticipant,
+  ActivityStaff,
   ActivityType,
-  Attendance,
   Beneficiary,
   Db,
   DonorDisbursement,
@@ -11,7 +12,6 @@ import type {
   Farmer,
   Indicator,
   IndicatorValue,
-  LeaveRequest,
   Profile,
   PwdFollowup,
   PwdIntervention,
@@ -109,7 +109,6 @@ export function buildSeed(): Db {
     { name: "Meera Kulkarni", role: "project_coordinator", email: "meera.kulkarni@voicetrust.org", designation: "Project Coordinator", dept: "Programmes" },
     { name: "Sameer Patil", role: "mel_officer", email: "sameer.patil@voicetrust.org", designation: "MEL Officer", dept: "Monitoring & Evaluation" },
     { name: "Ravi Shinde", role: "field_staff", email: "ravi.shinde@voicetrust.org", designation: "Field Staff", dept: "Field Operations" },
-    { name: "Neha Kadam", role: "hr_admin", email: "neha.kadam@voicetrust.org", designation: "HR & Admin Officer", dept: "HR & Administration" },
     { name: "Suresh Naik", role: "finance", email: "suresh.naik@voicetrust.org", designation: "Finance Officer", dept: "Finance" },
     { name: "Pooja More", role: "data_entry", email: "pooja.more@voicetrust.org", designation: "Data Entry Operator", dept: "Programmes" },
   ];
@@ -120,7 +119,7 @@ export function buildSeed(): Db {
     { name: "Sachin Gaikwad", designation: "Project Coordinator", dept: "Programmes" },
     { name: "Rekha Salunkhe", designation: "MEL Associate", dept: "Monitoring & Evaluation" },
     { name: "Nitin Wagh", designation: "Accounts Assistant", dept: "Finance" },
-    { name: "Sharda Mhatre", designation: "Admin Assistant", dept: "HR & Administration" },
+    { name: "Sharda Mhatre", designation: "Admin Assistant", dept: "Administration" },
   ];
 
   const staffSeeds: { name: string; designation: string; dept: string; email?: string }[] = [
@@ -140,7 +139,7 @@ export function buildSeed(): Db {
     department: p.dept,
     dateOfJoining: iso(daysAgo(between(200, 2600))),
     employmentType: i > 10 ? "contract" : "permanent",
-    employmentStatus: i === 13 ? "exited" : "active",
+    employmentStatus: i === 12 ? "exited" : "active",
     userId: null,
   }));
 
@@ -229,11 +228,16 @@ export function buildSeed(): Db {
       gender,
       dateOfBirth: iso(new Date(1955 + between(0, 50), between(0, 11), between(1, 28))),
       mobile: `9${between(700000000, 899999999)}`,
+      alternateContact: i % 3 === 0 ? `8${between(700000000, 999999999)}` : null,
+      addressLine: `House ${between(1, 240)}, ${pick(["Shivaji Nagar", "Gandhi Chowk", "Ambedkar Vasahat", "Station Road"])}`,
       villageId: villageId(i),
       enrolmentDate: iso(daysAgo(between(10, 300))),
       status: i % 29 === 0 ? "inactive" : "active",
       idProofType: pick(["aadhaar", "voter", "ration"] as const),
       idProofLast4: String(between(1000, 9999)),
+      createdBy: pick(["Asha Deshmukh", "Rohit Kulkarni", "Meera Joshi", "Sunil Pawar"]),
+      createdAt: iso(daysAgo(between(200, 400))),
+      updatedAt: iso(daysAgo(between(1, 60))),
       projectIds,
       consentGivenOn: iso(daysAgo(between(10, 300))),
     };
@@ -251,6 +255,13 @@ export function buildSeed(): Db {
       farmingType: pick(["conventional", "organic", "mixed", "mixed"] as const),
       organicStatus: pick(["none", "none", "in_conversion", "certified"] as const),
       irrigationSource: pick(["Well", "Canal", "Rain-fed", "Borewell"]),
+      trainingDetails: pick([
+        "Organic certification orientation (2 days)",
+        "Bio-input preparation and seed treatment training",
+        "IPM and soil health card workshop",
+      ]),
+      enrolmentDate: iso(daysAgo(between(30, 250))),
+      farmerGroup: i % 4 === 0 ? `FGRP-${String(between(1, 12)).padStart(2, "0")}` : null,
       organicPractices: "Neem cake, Jeevamrut, vermicompost application",
       supportReceived: "Soil testing kit, bio-fertilizer starter pack",
       equipmentReceived: "Battery sprayer, weeding tools",
@@ -274,6 +285,13 @@ export function buildSeed(): Db {
     villageId: villageId(v),
     formationDate: iso(daysAgo(between(300, 900))),
     meetingFrequency: "monthly",
+    numberOfMembers: between(5, 20),
+    livelihoodActivity: pick(["Agriculture", "Handicrafts", "Livestock", "Retail"] as const),
+    bankName: pick(["State Bank of India", "Bank of Baroda", "HDFC Bank", "ICICI Bank"] as const),
+    bankAccountNo: `9${between(100000000, 999999999)}`,
+    ifscCode: `SBIN0${String(between(1000, 9999))}`,
+    bankLinkageDate: iso(daysAgo(between(100, 500))),
+    supportReceived: "Capacity building grant, equipment support",
     status: "active",
     // Link each SHG to the project covering their village (WF-04)
     projectIds: [projects[2]!.id],
@@ -288,6 +306,14 @@ export function buildSeed(): Db {
       role: roleIndex === 0 ? "president" : roleIndex === 1 ? "secretary" : roleIndex === 2 ? "treasurer" : "member",
       joinDate: iso(daysAgo(between(60, 700))),
       status: "active",
+      memberId: `shm-${String(i + 47).padStart(6, "0")}`,
+      savingsBalance: Number((between(100, 5000) / 10).toFixed(1)),
+      totalSavingsToDate: Number((between(500, 20000) / 10).toFixed(1)),
+      internalLendingStatus: pick(["active", "restricted", "none"] as const),
+      bankLinkageStatus: pick(["linked", "pending", "none"] as const),
+      loanDetails: pick(["SHG loan, micro-credit", "No loan", "Enterprise loan"] as const),
+      attendanceRecords: pick(["Register entries, 90% attendance", "Register entries, 80% attendance", "Register entries, 70% attendance"] as const),
+      trainingRecords: pick(["Training completed - financial literacy", "Training completed - SHG bookkeeping", "No training yet"] as const),
     };
   });
 
@@ -356,6 +382,20 @@ export function buildSeed(): Db {
   };
   const activityTypes = Object.keys(activityTitles) as ActivityType[];
 
+  const venues = ["Gram Panchayat Hall", "Anganwadi centre", "Community hall", "School ground", "VOICE field office", "Farmer's field"];
+  const resourcePersonNames = [
+    "Dr. Ramesh Patil (ATMA), Block Agriculture Officer",
+    "Smt. Kavita Jadhav, VOICE Trust field coordinator",
+    "Shri Dattatreya More, Krishi Vigyan Kendra",
+    "Ms. Anita Sawant, NABARD district officer",
+  ];
+  const outputsResultsText = [
+    "Session completed as planned; attendance sheet collected.",
+    "40 seed kits distributed; demonstration of the improved method conducted.",
+    "Group reviewed last month's savings register and set next month's target.",
+    "Participants identified follow-up needs; three home visits scheduled.",
+  ];
+
   const now = new Date();
   const activities: Activity[] = Array.from({ length: 30 }, (_, i) => {
     const type = activityTypes[i % activityTypes.length]!;
@@ -367,6 +407,7 @@ export function buildSeed(): Db {
     const lastDay = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0).getDate();
     const day = monthOffset === 0 ? between(1, Math.max(now.getDate(), 1)) : between(1, lastDay);
     const when = new Date(monthStart.getFullYear(), monthStart.getMonth(), Math.min(day, lastDay));
+    const villageId = project.villageIds[i % project.villageIds.length]!;
     return {
       id: makeId("act", i + 1),
       code: `ACT-${String(i + 1).padStart(5, "0")}`,
@@ -377,10 +418,13 @@ export function buildSeed(): Db {
       activityType: type,
       startDate: iso(when),
       endDate: iso(when),
-      villageId: project.villageIds[i % project.villageIds.length]!,
+      villageId,
       targetParticipants: between(20, 60),
       status: "completed" as const,
       expenditure: between(2000, 18000),
+      location: `${pick(venues)}, ${villages.find((v) => v.id === villageId)?.name ?? project.name}`,
+      resourcePersons: pick(resourcePersonNames),
+      outputsResults: pick(outputsResultsText),
     };
   });
 
@@ -407,6 +451,21 @@ export function buildSeed(): Db {
     }));
   });
 
+  const activityStaff: ActivityStaff[] = activities.flatMap((a, i) => {
+    const first = employees[i % employees.length]!;
+    const second = employees[(i + 4) % employees.length]!;
+    return [...new Set([first.id, second.id])].map((employeeId) => ({ activityId: a.id, employeeId }));
+  });
+
+  // Filenames only — the prototype never holds the org's files.
+  const activityAttachments: ActivityAttachment[] = activities
+    .filter((a) => a.status === "completed")
+    .slice(0, 6)
+    .flatMap((a) => [
+      { id: `att-${a.id}-1`, activityId: a.id, filePath: `attendance-${a.code.toLowerCase()}.pdf`, kind: "document" as const, caption: "Attendance sheet" },
+      { id: `att-${a.id}-2`, activityId: a.id, filePath: `session-${a.code.toLowerCase()}.jpg`, kind: "photo" as const, caption: "Session in progress" },
+    ]);
+
   /* ---------------- MEL ---------------- */
   const indicatorNames = [
     ["Farmers trained in organic practices", "farmers"],
@@ -427,10 +486,17 @@ export function buildSeed(): Db {
       projectId: project.id,
       name,
       unit,
+      description: `${name} recorded for the ${project.name} project, as reported by the field team.`,
       baseline: between(0, 40),
       target: between(120, 600),
       reportingFrequency: i % 3 === 0 ? "monthly" : "quarterly",
+      dataSource:
+        i % 2 === 0
+          ? "Activity attendance registers and participant lists"
+          : "Field survey and SHG savings registers",
+      responsibleEmployeeId: i % 2 === 0 ? employees[3]!.id : employees[10]!.id,
       genderDisaggregated: i % 2 === 0,
+      status: i === 11 ? "inactive" : "active",
     };
   });
 
@@ -439,7 +505,9 @@ export function buildSeed(): Db {
     return Array.from({ length: periods }, (_, k) => {
       const end = daysAgo(k * 30 + 5);
       const start = daysAgo(k * 30 + 35);
-      const value = between(Math.round(ind.target * 0.05), Math.round(ind.target * 0.28));
+      // Mix of on-track and behind indicators so every chip appears in the demo.
+      const share = idx % 3 === 0 ? between(50, 85) : between(5, 28);
+      const value = Math.round((ind.target * share) / 100);
       const male = ind.genderDisaggregated ? Math.round(value * 0.45) : null;
       return {
         id: makeId("inv", idx * 3 + k + 1),
@@ -449,56 +517,15 @@ export function buildSeed(): Db {
         value,
         maleValue: male,
         femaleValue: male === null ? null : value - male,
+        remarks:
+          k === 0
+            ? "Verified against the attendance register."
+            : "Provisional; pending field verification.",
+        enteredBy: profiles[3]!.id,
+        enteredAt: stamp(daysAgo(k * 30 + 4)),
       };
     });
   });
-
-  /* ---------------- HR-lite ---------------- */
-  const leaveTypes = [
-    { id: "lt-1", name: "Casual leave", annualQuota: 12, isPaid: true },
-    { id: "lt-2", name: "Sick leave", annualQuota: 10, isPaid: true },
-    { id: "lt-3", name: "Earned leave", annualQuota: 15, isPaid: true },
-    { id: "lt-4", name: "Leave without pay", annualQuota: 0, isPaid: false },
-  ];
-
-  const leaveRequests: LeaveRequest[] = Array.from({ length: 9 }, (_, i) => {
-    const from = daysAhead(between(-18, 6));
-    const days = between(1, 4);
-    const to = new Date(from);
-    to.setDate(to.getDate() + days - 1);
-    return {
-      id: makeId("lvr", i + 1),
-      employeeId: employees[(i * 3) % 12]!.id,
-      leaveTypeId: leaveTypes[i % 3]!.id,
-      fromDate: iso(from),
-      toDate: iso(to),
-      days,
-      reason: pick(["Family function", "Medical treatment", "Personal work", "Village travel"]),
-      status: i < 6 ? "pending" : i < 8 ? "approved" : "rejected",
-      appliedAt: stamp(daysAgo(between(1, 10))),
-    };
-  });
-
-  const attendance: Attendance[] = Array.from({ length: 14 }, (_, d) =>
-    employees.slice(0, 12).map((e, i) => {
-      const roll = rnd();
-      const status =
-        e.employmentStatus === "exited"
-          ? "absent"
-          : d === 6 || d === 13
-            ? "holiday"
-            : roll > 0.86
-              ? "on_leave"
-              : roll > 0.72
-                ? "field_duty"
-                : "present";
-      return {
-        employeeId: e.id,
-        attendanceDate: iso(daysAgo(d)),
-        status: status as Attendance["status"],
-      };
-    }),
-  ).flat();
 
   /* ---------------- Audit log ---------------- */
   const audit = Array.from({ length: 40 }, (_, i) => {
@@ -512,28 +539,6 @@ export function buildSeed(): Db {
       recordId: makeId("ben", between(1, 120)),
       at: stamp(daysAgo(between(0, 20))),
     };
-  });
-
-  /* ---------------- Project allocations (PRD §4.5) ---------------- */
-  const projectAllocations = employees.slice(0, 12).flatMap((employee, i) => {
-    const first = projects[i % 5]!;
-    const rows = [
-      {
-        employeeId: employee.id,
-        projectId: first.id,
-        allocationPct: 60,
-        fromDate: iso(daysAgo(200)),
-      },
-    ];
-    if (i % 2 === 0) {
-      rows.push({
-        employeeId: employee.id,
-        projectId: projects[(i + 1) % 5]!.id,
-        allocationPct: 40,
-        fromDate: iso(daysAgo(120)),
-      });
-    }
-    return rows;
   });
 
   /* ---------------- Scopes (PRD §5.2) ---------------- */
@@ -567,7 +572,6 @@ export function buildSeed(): Db {
     programmes,
     projects,
     employees,
-    projectAllocations,
     beneficiaries,
     farmers,
     pwdProfiles,
@@ -578,11 +582,10 @@ export function buildSeed(): Db {
     savings,
     activities,
     participants,
+    activityStaff,
+    activityAttachments,
     indicators,
     indicatorValues,
-    leaveTypes,
-    leaveRequests,
-    attendance,
     audit,
   };
 }

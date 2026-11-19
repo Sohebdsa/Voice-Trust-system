@@ -122,7 +122,7 @@ export default async function ShgsPage({
 
       {/* Filter Bar */}
       <div className="filter-bar" style={{ padding: "8px 16px", background: "var(--paper)", borderBottom: "1px solid var(--line)" }}>
-        <form method="get" className="filter-form" style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+        <form method="get" className="filter-form">
           <input
             className="input"
             name="q"

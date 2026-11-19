@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/icons";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { canArchive, canEdit } from "@/lib/masters";
 import { findProject, projectDetail } from "@/lib/queries/masters";
+import { indicatorsForProject } from "@/lib/queries/mel";
 import { requireRole } from "@/lib/session";
 
 const TABS = [
@@ -15,7 +16,7 @@ const TABS = [
   { key: "beneficiaries", label: "Beneficiaries" },
   { key: "activities", label: "Activities" },
   { key: "indicators", label: "Indicators" },
-  { key: "team", label: "Team & villages" },
+  { key: "villages", label: "Villages" },
   { key: "budget", label: "Budget" },
 ];
 
@@ -41,14 +42,13 @@ export default async function ProjectDetailPage({
   const requested = (await searchParams).tab;
   const active = typeof requested === "string" && TABS.some((tab) => tab.key === requested) ? requested : "overview";
   const detail = projectDetail(project, profile);
+  const indicators = indicatorsForProject(project.id, profile);
 
   const villageColumns: Column<(typeof detail.villages)[number]>[] = [
     { key: "name", label: "Village", cell: (row) => row.name },
     { key: "block", label: "Block", cell: (row) => row.block },
     { key: "beneficiaries", label: "Beneficiaries", end: true, cell: (row) => formatNumber(row.beneficiaries) },
   ];
-
-  const allocations = detail.team;
 
   return (
     <>
@@ -79,7 +79,7 @@ export default async function ProjectDetailPage({
               : tab.key === "activities"
                 ? detail.activities.length
                 : tab.key === "indicators"
-                  ? detail.indicators.length
+                  ? indicators.length
                   : undefined,
         }))}
       />
@@ -104,7 +104,7 @@ export default async function ProjectDetailPage({
                   { label: "Active beneficiaries", value: formatNumber(detail.beneficiaryTotal) },
                   { label: "Villages attached", value: String(detail.villages.length) },
                   { label: "Activities", value: String(detail.activities.length) },
-                  { label: "Indicators", value: String(detail.indicators.length) },
+                  { label: "Indicators", value: String(indicators.length) },
                 ]}
               />
             </section>
@@ -173,69 +173,64 @@ export default async function ProjectDetailPage({
             <DataTable
               caption={`Indicators for ${project.name}`}
               columns={[
-                { key: "name", label: "Indicator", cell: (row) => row.name },
+                {
+                  key: "name",
+                  label: "Indicator",
+                  cell: (row) => (
+                    <>
+                      <span className="cell-title">{row.name}</span>
+                      <span className="cell-sub num">{row.code} · {row.responsibleName}</span>
+                    </>
+                  ),
+                },
+                { key: "baseline", label: "Baseline", end: true, cell: (row) => formatNumber(row.baseline) },
                 { key: "target", label: "Target", end: true, cell: (row) => `${formatNumber(row.target)} ${row.unit}` },
-                { key: "achieved", label: "Achieved", end: true, cell: (row) => `${formatNumber(row.achieved)} ${row.unit}` },
-                { key: "percent", label: "Achieved", end: true, cell: (row) => `${row.percent}%` },
+                {
+                  key: "achieved",
+                  label: "Latest",
+                  end: true,
+                  cell: (row) =>
+                    row.latest ? `${formatNumber(row.achieved)} ${row.unit}` : <span className="muted">—</span>,
+                },
+                { key: "percent", label: "Achieved", end: true, cell: (row) => (row.latest ? `${row.percent}%` : "—") },
                 {
                   key: "status",
-                  label: "Status",
+                  label: "Progress",
                   cell: (row) => (
                     <StatusPill
-                      label={row.status.replace("_", " ")}
-                      tone={statusTone(row.status)}
+                      label={row.achievement.replace("_", " ")}
+                      tone={statusTone(row.achievement)}
                     />
                   ),
                 },
               ]}
-              rows={detail.indicators}
+              rows={indicators}
               href="/mel"
               empty={
                 <p className="empty">
                   <strong>No indicators defined.</strong>
-                  <span>MEL indicators arrive in Step 6.</span>
+                  <span>Create the first indicator for this project from the MEL screen.</span>
                 </p>
               }
             />
           </section>
         ) : null}
 
-        {active === "team" ? (
-          <div className="stack-cards">
-            <section className="card list-card">
-              <DataTable
-                caption={`Team allocated to ${project.name}`}
-                columns={[
-                  { key: "name", label: "Team member", cell: (row) => row.name },
-                  { key: "designation", label: "Designation", cell: (row) => row.designation },
-                  { key: "from", label: "Allocated from", cell: (row) => row.fromDate },
-                  { key: "pct", label: "Allocation", end: true, cell: (row) => `${row.allocationPct}%` },
-                ]}
-                rows={allocations}
-                href="/employees"
-                empty={
-                  <p className="empty">
-                    <strong>Nobody is allocated to this project.</strong>
-                    <span>Allocate staff from the employee record.</span>
-                  </p>
-                }
-              />
-            </section>
-            <section className="card list-card">
-              <DataTable
-                caption={`Villages covered by ${project.name}`}
-                columns={villageColumns}
-                rows={detail.villages}
-                href="/villages"
-                empty={
-                  <p className="empty">
-                    <strong>No villages attached.</strong>
-                    <span>Edit the project and tick the villages it covers.</span>
-                  </p>
-                }
-              />
-            </section>
-          </div>
+        {active === "villages" ? (
+          <section className="card list-card">
+            <DataTable
+              caption={`Villages covered by ${project.name}`}
+              columns={villageColumns}
+              rows={detail.villages}
+              href="/villages"
+              empty={
+                <p className="empty">
+                  <strong>No villages attached.</strong>
+                  <span>Edit the project and tick the villages it covers.</span>
+                </p>
+              }
+            />
+          </section>
         ) : null}
 
         {active === "budget" ? (

@@ -23,7 +23,15 @@ export type BeneficiaryFormValues = {
   gender: Gender | "";
   dateOfBirth: string;
   mobile: string;
+  alternateContact?: string;
+  addressLine?: string;
   villageId: string;
+  enrolmentDate?: string;
+  status?: RecordStatus | "";
+  code?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
   idProofType: string;
   idProofLast4: string;
   photoPath?: string;
@@ -62,6 +70,15 @@ export function validateBeneficiary(values: BeneficiaryFormValues, isNew = false
     errors.mobile = "Mobile number is required.";
   } else if (!/^[6-9]\d{9}$/.test(mobile)) {
     errors.mobile = "Enter a valid 10-digit Indian mobile number.";
+  }
+
+  const alt = values.alternateContact?.trim().replace(/\D/g, "") ?? "";
+  if (alt && !/^[6-9]\d{9}$/.test(alt)) {
+    errors.alternateContact = "Enter a valid 10-digit alternate number.";
+  }
+
+  if (values.enrolmentDate && isNaN(new Date(values.enrolmentDate).getTime())) {
+    errors.enrolmentDate = "Enter a valid enrolment date.";
   }
 
   if (!values.villageId) {

@@ -1,11 +1,12 @@
 import type { Role, RecordStatus, Farmer, PwdProfile, Shg, ShgMember } from "./data/types";
 
-/**
- * Permissions and validators for Step 4 modules:
+/** Permissions and validators for Step 4 modules:
  * - Farmer profiles (PRD §7.4)
  * - Self-Help Groups (PRD §7.5)
  * - PWD / GAP sensitive profiles (PRD §7.6)
  */
+
+/** Role-based access control helpers. */
 
 export const canAccessFarmer = (role: Role) =>
   role === "admin" ||
@@ -35,10 +36,10 @@ export const canEditShg = (role: Role) => canCreateShg(role);
 
 export const canRecordShgSavings = (role: Role) => canCreateShg(role);
 
-/**
- * PWD profiles are strictly confidential (PRD §5.1, §5.2, §7.6).
- * data_entry, hr_admin, and finance are explicitly forbidden.
+/** PWD profiles are strictly confidential (PRD §5.1, §5.2, §7.6).
+ * data_entry and finance are explicitly forbidden.
  */
+
 export const canAccessPwd = (role: Role) =>
   role === "admin" ||
   role === "programme_manager" ||
@@ -55,12 +56,17 @@ export const canEditPwd = (role: Role) => canCreatePwd(role);
 
 export type FarmerFormValues = {
   id?: string;
+  code?: string;
   beneficiaryId: string;
   landHoldingAcres: string;
   landOwnership: "owned" | "leased" | "shared" | "landless" | "";
   farmingType: "conventional" | "organic" | "mixed" | "";
   organicStatus: "none" | "in_conversion" | "certified" | "";
   irrigationSource: string;
+  trainingDetails?: string;
+  enrolmentDate?: string;
+  farmerGroup?: string;
+  status?: RecordStatus | "";
   organicPractices?: string;
   supportReceived?: string;
   equipmentReceived?: string;
@@ -76,6 +82,13 @@ export type ShgFormValues = {
   villageId: string;
   formationDate: string;
   meetingFrequency: "weekly" | "fortnightly" | "monthly" | "";
+  numberOfMembers: string;
+  livelihoodActivity: string;
+  bankName: string;
+  bankAccountNo: string;
+  ifscCode: string;
+  bankLinkageDate: string;
+  supportReceived: string;
   projectIds: string[];
 };
 
@@ -93,6 +106,9 @@ export type PwdFormValues = {
   assistiveDevice?: string;
   individualPlan?: string;
   outcome?: string;
+  familyDetails?: string;
+  interventionSupport?: string;
+  trainingRecords?: string;
 };
 
 /* ---------------- Validators ---------------- */
@@ -106,6 +122,10 @@ export function validateFarmer(values: FarmerFormValues): Record<string, string>
   if (!values.farmingType) errors.farmingType = "Farming practice type is required.";
   if (!values.organicStatus) errors.organicStatus = "Organic status is required.";
   if (!values.irrigationSource?.trim()) errors.irrigationSource = "Irrigation source is required.";
+
+  if (values.enrolmentDate && isNaN(new Date(values.enrolmentDate).getTime())) {
+    errors.enrolmentDate = "Enter a valid enrolment date.";
+  }
 
   if (values.gpsLatitude) {
     const lat = Number(values.gpsLatitude);
@@ -128,6 +148,13 @@ export function validateShg(values: ShgFormValues): Record<string, string> {
   if (!values.villageId?.trim()) errors.villageId = "Village selection is required.";
   if (!values.formationDate?.trim()) errors.formationDate = "Formation date is required.";
   if (!values.meetingFrequency) errors.meetingFrequency = "Meeting cadence is required.";
+  if (!values.numberOfMembers) errors.numberOfMembers = "Number of members is required.";
+  if (!values.livelihoodActivity?.trim()) errors.livelihoodActivity = "Livelihood activity is required.";
+  if (!values.bankName?.trim()) errors.bankName = "Bank name is required.";
+  if (!values.bankAccountNo?.trim()) errors.bankAccountNo = "Bank account number is required.";
+  if (!values.ifscCode?.trim()) errors.ifscCode = "IFSC code is required.";
+  if (!values.bankLinkageDate?.trim()) errors.bankLinkageDate = "Bank linkage date is required.";
+  if (!values.supportReceived?.trim()) errors.supportReceived = "Support received is required.";
   return errors;
 }
 

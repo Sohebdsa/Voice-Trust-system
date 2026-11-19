@@ -25,7 +25,6 @@ const ALL_ROLES: Role[] = [
   "project_coordinator",
   "mel_officer",
   "field_staff",
-  "hr_admin",
   "finance",
   "data_entry",
 ];
@@ -38,7 +37,6 @@ export const NAV: NavGroup[] = [
     label: "Overview",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: "dashboard", roles: ["admin", "programme_manager", "project_coordinator", "mel_officer"] },
-      { label: "HRMS dashboard", href: "/dashboard/hr", icon: "hr", roles: ["admin", "hr_admin"] },
       { label: "Budget summary", href: "/dashboard/finance", icon: "wallet", roles: ["admin", "finance"] },
       { label: "My home", href: "/home", icon: "home", roles: ["field_staff", "data_entry"] },
     ],
@@ -49,8 +47,6 @@ export const NAV: NavGroup[] = [
       { label: "Beneficiaries", href: "/beneficiaries", icon: "people", roles: ["admin", "programme_manager", "project_coordinator", "mel_officer", "field_staff", "data_entry"], step: 3 },
       { label: "Self-help groups", href: "/shgs", icon: "group", roles: ["admin", "programme_manager", "project_coordinator", "field_staff"], step: 4 },
       { label: "PWD profiles", href: "/pwd", icon: "accessibility", roles: ["admin", "programme_manager", "project_coordinator", "field_staff"], step: 4 },
-      { label: "Employees", href: "/employees", icon: "badge", roles: ["admin", "hr_admin", "programme_manager"], step: 7 },
-      { label: "Leave", href: "/leave", icon: "calendar", roles: ["admin", "hr_admin", "programme_manager"], step: 7 },
     ],
   },
   {
@@ -65,16 +61,8 @@ export const NAV: NavGroup[] = [
   {
     label: "Organisation",
     items: [
-      { label: "Villages", href: "/villages", icon: "map", roles: ALL_ROLES.filter((r) => r !== "hr_admin"), step: 2 },
+      { label: "Villages", href: "/villages", icon: "map", roles: ALL_ROLES, step: 2 },
       { label: "Donors", href: "/donors", icon: "handshake", roles: ["admin", "programme_manager", "project_coordinator", "mel_officer", "finance", "data_entry"], step: 2 },
-      { label: "Attendance", href: "/attendance", icon: "clock", roles: ["admin", "hr_admin"], step: 7 },
-    ],
-  },
-  {
-    label: "Admin",
-    items: [
-      { label: "Users & roles", href: "/users", icon: "shield", roles: ["admin"], step: 8 },
-      { label: "Audit log", href: "/audit", icon: "list", roles: ["admin"], step: 8 },
     ],
   },
 ];
@@ -96,7 +84,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   project_coordinator: "Project Coordinator",
   mel_officer: "MEL Officer",
   field_staff: "Field Staff",
-  hr_admin: "HR & Admin",
+  hr_admin: "HR Admin",
   finance: "Finance",
   data_entry: "Data Entry",
 };

@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { checkDuplicateMobile, saveBeneficiary, type BeneficiarySaveState } from "@/app/actions/beneficiaries";
+import { ProjectPicker } from "./project-picker";
 import { Icon } from "@/components/ui/icons";
+import { formatDate } from "@/lib/format";
 import type { BeneficiaryFormValues, DuplicateMatch } from "@/lib/beneficiaries";
 
 const INITIAL: BeneficiarySaveState = {};
@@ -17,7 +19,14 @@ export function BeneficiaryForm({
   id?: string;
   initialValues?: Partial<BeneficiaryFormValues>;
   options: {
-    villages: { value: string; label: string }[];
+    villages: {
+      value: string;
+      label: string;
+      block?: string;
+      panchayat?: string;
+      district?: string;
+      state?: string;
+    }[];
     projects: { value: string; label: string }[];
   };
   cancelHref: string;
@@ -25,7 +34,9 @@ export function BeneficiaryForm({
   const [state, action, pending] = useActionState(saveBeneficiary, INITIAL);
   const [allowDup, setAllowDup] = useState(false);
   const [inlineDuplicates, setInlineDuplicates] = useState<DuplicateMatch[]>([]);
-  const [photoPreview, setPhotoPreview] = useState<string>(String(initialValues?.photoPath ?? ""));
+  const [photoName, setPhotoName] = useState(String(initialValues?.photoPath ?? ""));
+  const [villageId, setVillageId] = useState(String(initialValues?.villageId ?? ""));
+  const selectedVillage = options.villages.find((v) => v.value === villageId);
 
   const value = (name: keyof BeneficiaryFormValues) => {
     if (state.values && state.values[name] !== undefined) {
@@ -71,6 +82,19 @@ export function BeneficiaryForm({
 
       <div className="form-grid">
         <p className="form-section-title span-2">1. Identity</p>
+
+        <div className="field">
+          <label className="label" htmlFor="field-code">
+            Beneficiary ID
+          </label>
+          <input
+            className="input num"
+            id="field-code"
+            value={String(initialValues?.code ?? "Auto-generated on save")}
+            readOnly
+          />
+          <p className="help">Assigned by the system as BEN-000000.</p>
+        </div>
 
         <div className="field span-2">
           <label className="label" htmlFor="field-fullName">
@@ -143,7 +167,7 @@ export function BeneficiaryForm({
           )}
         </div>
 
-        <p className="form-section-title span-2">2. Contact & Village</p>
+        <p className="form-section-title span-2">2. Contact & Address</p>
 
         <div className="field">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -215,6 +239,45 @@ export function BeneficiaryForm({
         </div>
 
         <div className="field">
+          <label className="label" htmlFor="field-alternateContact">
+            Alternate contact
+          </label>
+          <input
+            className="input"
+            id="field-alternateContact"
+            name="alternateContact"
+            type="tel"
+            inputMode="numeric"
+            maxLength={10}
+            placeholder="Optional 10-digit number"
+            defaultValue={String(value("alternateContact"))}
+            aria-invalid={error("alternateContact") ? true : undefined}
+            aria-describedby={error("alternateContact") ? "alternateContact-error" : undefined}
+          />
+          {error("alternateContact") && (
+            <p className="error-text" id="alternateContact-error">
+              {error("alternateContact")}
+            </p>
+          )}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-addressLine">
+            Address line
+          </label>
+          <input
+            className="input"
+            id="field-addressLine"
+            name="addressLine"
+            type="text"
+            placeholder="House / street / hamlet"
+            maxLength={160}
+            defaultValue={String(value("addressLine"))}
+            aria-invalid={error("addressLine") ? true : undefined}
+          />
+        </div>
+
+        <div className="field">
           <label className="label" htmlFor="field-villageId">
             Village <span aria-hidden="true">*</span>
           </label>
@@ -223,7 +286,8 @@ export function BeneficiaryForm({
             id="field-villageId"
             name="villageId"
             required
-            defaultValue={String(value("villageId"))}
+            value={villageId}
+            onChange={(e) => setVillageId(e.target.value)}
             aria-invalid={error("villageId") ? true : undefined}
             aria-describedby={error("villageId") ? "villageId-error" : undefined}
           >
@@ -239,6 +303,48 @@ export function BeneficiaryForm({
               {error("villageId")}
             </p>
           )}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-enrolmentDate">
+            Enrolment date
+          </label>
+          <input
+            className="input"
+            id="field-enrolmentDate"
+            name="enrolmentDate"
+            type="date"
+            defaultValue={
+              String(value("enrolmentDate")) || new Date().toISOString().slice(0, 10)
+            }
+            aria-invalid={error("enrolmentDate") ? true : undefined}
+            aria-describedby={error("enrolmentDate") ? "enrolmentDate-error" : undefined}
+          />
+          {error("enrolmentDate") && (
+            <p className="error-text" id="enrolmentDate-error">
+              {error("enrolmentDate")}
+            </p>
+          )}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-block">Block (from village)</label>
+          <input className="input" id="field-block" value={selectedVillage?.block ?? ""} readOnly />
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-panchayat">Panchayat (from village)</label>
+          <input className="input" id="field-panchayat" value={selectedVillage?.panchayat ?? ""} readOnly />
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-district">District (from village)</label>
+          <input className="input" id="field-district" value={selectedVillage?.district ?? ""} readOnly />
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-state">State (from village)</label>
+          <input className="input" id="field-state" value={selectedVillage?.state ?? ""} readOnly />
         </div>
 
         <p className="form-section-title span-2">3. Identity Document</p>
@@ -264,7 +370,7 @@ export function BeneficiaryForm({
 
         <div className="field">
           <label className="label" htmlFor="field-idProofLast4">
-            Last 4 digits
+            ID proof number
           </label>
           <input
             className="input"
@@ -278,7 +384,7 @@ export function BeneficiaryForm({
             aria-describedby={error("idProofLast4") ? "idProofLast4-error" : "idProofLast4-help"}
           />
           <p className="help" id="idProofLast4-help">
-            DPDP Act: store last 4 digits only.
+            DPDP Act: only the last 4 digits of the ID number are stored.
           </p>
           {error("idProofLast4") && (
             <p className="error-text" id="idProofLast4-error">
@@ -289,22 +395,15 @@ export function BeneficiaryForm({
 
         <p className="form-section-title span-2">4. Projects</p>
 
-        <fieldset className="field span-2 checks">
-          <legend className="label">Projects to enrol in</legend>
-          {options.projects.map((p) => (
-            <label className="check" key={p.value}>
-              <input
-                type="checkbox"
-                name="projectIds"
-                value={p.value}
-                defaultChecked={selectedProjects().includes(p.value)}
-              />
-              {p.label}
-            </label>
-          ))}
-        </fieldset>
+        <div className="field span-2" role="group" aria-labelledby="field-projects-label">
+          <span className="label" id="field-projects-label">
+            Projects to enrol in
+          </span>
+          <ProjectPicker options={options.projects} selected={selectedProjects()} />
+          <p className="help">A beneficiary can be enrolled in more than one project.</p>
+        </div>
 
-        <p className="form-section-title span-2">5. Photo & Profile Picture (Optional)</p>
+        <p className="form-section-title span-2">5. Photograph</p>
 
         <div className="field span-2">
           <label className="label" htmlFor="field-photo">Beneficiary photograph</label>
@@ -314,28 +413,50 @@ export function BeneficiaryForm({
             type="file"
             accept="image/*"
             capture="user"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  setPhotoPreview(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
+            onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? "")}
           />
-          <input type="hidden" name="photoPath" value={photoPreview || String(value("photoPath") ?? "")} />
-          {photoPreview && (
+          <input type="hidden" name="photoPath" value={photoName} />
+          {photoName && (
             <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
-              <img src={photoPreview} alt="Beneficiary preview" style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--line)" }} />
-              <button type="button" className="btn btn-ghost" style={{ fontSize: "12px" }} onClick={() => setPhotoPreview("")}>Remove</button>
+              <span className="help" style={{ margin: 0 }}>{photoName}</span>
+              <button type="button" className="btn btn-ghost" style={{ fontSize: "12px" }} onClick={() => setPhotoName("")}>Remove</button>
             </div>
           )}
-          <p className="help">Capture live via camera or upload photo file (PRD §7.3).</p>
+          <p className="help">Only the file name is recorded — this prototype stores no upload (PRD §7.3).</p>
         </div>
 
-        <p className="form-section-title span-2">6. Consent</p>
+        <p className="form-section-title span-2">6. Record</p>
+
+        <div className="field">
+          <label className="label" htmlFor="field-status">Status</label>
+          <select className="input" id="field-status" name="status" defaultValue={String(value("status") || "active")}>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        {initialValues?.createdBy && (
+          <div className="field">
+            <label className="label" htmlFor="field-createdBy">Created by</label>
+            <input className="input" id="field-createdBy" value={initialValues.createdBy} readOnly />
+          </div>
+        )}
+
+        {initialValues?.createdAt && (
+          <div className="field">
+            <label className="label" htmlFor="field-createdAt">Created at</label>
+            <input className="input" id="field-createdAt" value={formatDate(initialValues.createdAt)} readOnly />
+          </div>
+        )}
+
+        {initialValues?.updatedAt && (
+          <div className="field">
+            <label className="label" htmlFor="field-updatedAt">Updated at</label>
+            <input className="input" id="field-updatedAt" value={formatDate(initialValues.updatedAt)} readOnly />
+          </div>
+        )}
+
+        <p className="form-section-title span-2">7. Consent</p>
 
         <div className="field span-2">
           <label className="check">

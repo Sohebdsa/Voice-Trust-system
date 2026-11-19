@@ -93,9 +93,15 @@ export default async function ShgDetailPage({
                 items={[
                   { label: "Group code", value: shg.code },
                   { label: "Group legal name", value: shg.name },
-                  { label: "Village & block", value: village ? `${village.name}, ${village.block}` : "—" },
                   { label: "Formation date", value: formatDate(shg.formationDate) },
                   { label: "Savings cadence", value: shg.meetingFrequency },
+                  { label: "Number of members", value: String(shg.numberOfMembers ?? members.length) },
+                  { label: "Livelihood activity", value: shg.livelihoodActivity },
+                  { label: "Bank name", value: shg.bankName },
+                  { label: "Bank account no", value: shg.bankAccountNo },
+                  { label: "IFSC code", value: shg.ifscCode },
+                  { label: "Bank linkage date", value: formatDate(shg.bankLinkageDate) },
+                  { label: "Support received", value: shg.supportReceived },
                   { label: "Active member count", value: `${members.length} women members` },
                   { label: "Net group savings balance", value: formatCurrency(totalSavings) },
                   { label: "Supporting projects", value: `${projects.length} project(s)` },
@@ -356,7 +362,7 @@ export default async function ShgDetailPage({
                   <p className="help">Rule: Only one active president, secretary, and treasurer allowed per group.</p>
                 </div>
 
-                <div className="field">
+                                <div className="field">
                   <label className="label" htmlFor="field-joinDate">
                     Join Date <span aria-hidden="true">*</span>
                   </label>
@@ -369,6 +375,125 @@ export default async function ShgDetailPage({
                     defaultValue={new Date().toISOString().slice(0, 10)}
                   />
                 </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-memberId">
+                    Member ID <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-memberId"
+                    name="memberId"
+                    type="text"
+                    required
+                    defaultValue={"shm-" + Date.now().toString(36)}
+                  />
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-savingsBalance">
+                    Savings Balance <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-savingsBalance"
+                    name="savingsBalance"
+                    type="number"
+                    min="0"
+                    required
+                    defaultValue="0"
+                  />
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-totalSavingsToDate">
+                    Total Savings To Date <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-totalSavingsToDate"
+                    name="totalSavingsToDate"
+                    type="number"
+                    min="0"
+                    required
+                    defaultValue="0"
+                  />
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-internalLendingStatus">
+                    Internal Lending Status <span aria-hidden="true">*</span>
+                  </label>
+                  <select
+                    className="input"
+                    id="field-internalLendingStatus"
+                    name="internalLendingStatus"
+                    required
+                  >
+                    <option value="active">Active</option>
+                    <option value="restricted">Restricted</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-bankLinkageStatus">
+                    Bank Linkage Status <span aria-hidden="true">*</span>
+                  </label>
+                  <select
+                    className="input"
+                    id="field-bankLinkageStatus"
+                    name="bankLinkageStatus"
+                    required
+                  >
+                    <option value="linked">Linked</option>
+                    <option value="pending">Pending</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-loanDetails">
+                    Loan Details <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-loanDetails"
+                    name="loanDetails"
+                    type="text"
+                    required
+                    placeholder="e.g. SHG loan, micro-credit"
+                  />
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-attendanceRecords">
+                    Attendance Records <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-attendanceRecords"
+                    name="attendanceRecords"
+                    type="text"
+                    required
+                    placeholder="e.g. Register entries, attendance %"
+                  />
+                </div>
+
+                <div className="field span-2">
+                  <label className="label" htmlFor="field-trainingRecords">
+                    Training Records <span aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    className="input"
+                    id="field-trainingRecords"
+                    name="trainingRecords"
+                    type="text"
+                    required
+                    placeholder="e.g. Training completed, topics"
+                  />
+                </div>
+
               </div>
 
               <div className="drawer-foot" style={{ marginTop: "24px" }}>

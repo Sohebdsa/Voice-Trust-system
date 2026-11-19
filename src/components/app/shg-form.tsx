@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { saveShg, type ProfileSaveState } from "@/app/actions/profiles";
 import type { ShgFormValues } from "@/lib/profiles";
+import { ProjectPicker } from "./project-picker";
 
 const INITIAL: ProfileSaveState = {};
 
@@ -108,22 +109,126 @@ export function ShgForm({
           </select>
         </div>
 
+        <div className="field span-2">
+          <label className="label" htmlFor="field-number-of-members">
+            Number of Members <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-number-of-members"
+            name="numberOfMembers"
+            type="number"
+            min="0"
+            required
+            defaultValue={initialValues?.numberOfMembers ?? ""}
+          />
+          {state.fieldErrors?.numberOfMembers && <p className="error-text">{state.fieldErrors.numberOfMembers}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-livelihood-activity">
+            Livelihood Activity <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-livelihood-activity"
+            name="livelihoodActivity"
+            type="text"
+            required
+            placeholder="e.g. Papad making, Agarbatti, Handicrafts"
+            defaultValue={initialValues?.livelihoodActivity ?? ""}
+          />
+          {state.fieldErrors?.livelihoodActivity && <p className="error-text">{state.fieldErrors.livelihoodActivity}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-bank-name">
+            Bank Name <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-bank-name"
+            name="bankName"
+            type="text"
+            required
+            placeholder="e.g. State Bank of India"
+            defaultValue={initialValues?.bankName ?? ""}
+          />
+          {state.fieldErrors?.bankName && <p className="error-text">{state.fieldErrors.bankName}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-bank-account">
+            Bank Account No <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-bank-account"
+            name="bankAccountNo"
+            type="text"
+            required
+            placeholder="e.g. 123456789012"
+            defaultValue={initialValues?.bankAccountNo ?? ""}
+          />
+          {state.fieldErrors?.bankAccountNo && <p className="error-text">{state.fieldErrors.bankAccountNo}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-ifsc-code">
+            IFSC Code <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-ifsc-code"
+            name="ifscCode"
+            type="text"
+            required
+            placeholder="e.g. SBIN0001234"
+            defaultValue={initialValues?.ifscCode ?? ""}
+          />
+          {state.fieldErrors?.ifscCode && <p className="error-text">{state.fieldErrors.ifscCode}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-bank-linkage-date">
+            Bank Linkage Date <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-bank-linkage-date"
+            name="bankLinkageDate"
+            type="date"
+            required
+            defaultValue={initialValues?.bankLinkageDate ?? new Date().toISOString().slice(0, 10)}
+          />
+          {state.fieldErrors?.bankLinkageDate && <p className="error-text">{state.fieldErrors.bankLinkageDate}</p>}
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-support-received">
+            Support Received <span aria-hidden="true">*</span>
+          </label>
+          <input
+            className="input"
+            id="field-support-received"
+            name="supportReceived"
+            type="text"
+            required
+            placeholder="e.g. Revolving fund, micro-credit"
+            defaultValue={initialValues?.supportReceived ?? ""}
+          />
+          {state.fieldErrors?.supportReceived && <p className="error-text">{state.fieldErrors.supportReceived}</p>}
+        </div>
+
         <p className="form-section-title span-2">Linked Development Projects (PRD §4.7 / §7.5)</p>
 
-        <fieldset className="field span-2 checks">
-          <legend className="label">Projects supporting this SHG</legend>
-          {options.projects.map((p) => (
-            <label className="check" key={p.value}>
-              <input
-                type="checkbox"
-                name="projectIds"
-                value={p.value}
-                defaultChecked={selectedProjects.includes(p.value)}
-              />
-              {p.label}
-            </label>
-          ))}
-        </fieldset>
+        <div className="field span-2" role="group" aria-labelledby="field-projects-label">
+          <span className="label" id="field-projects-label">
+            Projects supporting this SHG
+          </span>
+          <ProjectPicker options={options.projects} selected={selectedProjects} />
+          <p className="help">Choose every project that supports this group.</p>
+        </div>
       </div>
 
       <div className="drawer-foot">

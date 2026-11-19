@@ -5,6 +5,7 @@ import { StatusPill, statusTone } from "@/components/app/status-pill";
 import { Topbar } from "@/components/app/topbar";
 import { Icon } from "@/components/ui/icons";
 import { FarmerForm } from "@/components/app/farmer-form";
+import { BeneficiarySelectNav } from "@/components/app/beneficiary-select-nav";
 import { buildQuery } from "@/lib/masters";
 import {
   canAccessFarmer,
@@ -167,7 +168,7 @@ export default async function FarmersPage({
 
       {/* Filter Bar */}
       <div className="filter-bar" style={{ padding: "8px 16px", background: "var(--paper)", borderBottom: "1px solid var(--line)" }}>
-        <form method="get" className="filter-form" style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+        <form method="get" className="filter-form">
           <input
             className="input"
             name="q"
@@ -250,22 +251,7 @@ export default async function FarmersPage({
               <div style={{ padding: "16px 20px 0" }}>
                 <label className="label">Select Registered Beneficiary</label>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <select
-                    className="input"
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        window.location.href = `${base}${base.includes("?") ? "&" : "?"}beneficiaryId=${e.target.value}`;
-                      }
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="">Choose beneficiary…</option>
-                    {availableBens.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.fullName} ({b.code})
-                      </option>
-                    ))}
-                  </select>
+                  <BeneficiarySelectNav base={base} options={availableBens} />
                 </div>
                 <p className="help">Every farmer profile must link to an enrolled beneficiary.</p>
               </div>

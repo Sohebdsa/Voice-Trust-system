@@ -215,7 +215,14 @@ export function getBeneficiaryFormOptions(profile: Profile) {
   const scope = scopeForRole(profile.id, profile.role);
   const villages = db.villages
     .filter((v) => scope.villageIds === null || scope.villageIds.includes(v.id))
-    .map((v) => ({ value: v.id, label: `${v.name} (${v.block}, ${v.district})` }));
+    .map((v) => ({
+      value: v.id,
+      label: `${v.name} (${v.block}, ${v.district})`,
+      block: v.block,
+      panchayat: v.panchayat,
+      district: v.district,
+      state: v.state,
+    }));
 
   const projects = db.projects
     .filter((p) => p.status === "active" && (scope.projectIds === null || scope.projectIds.includes(p.id)))

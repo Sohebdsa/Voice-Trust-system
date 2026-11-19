@@ -33,7 +33,7 @@ export default async function SignInPage() {
           </span>
           <span>
             <span className="workspace-name">VOICE Trust</span>
-            <span className="workspace-email">Integrated MIS, HRMS &amp; programmes</span>
+            <span className="workspace-email">Integrated MIS &amp; programmes</span>
           </span>
         </div>
 
@@ -45,7 +45,7 @@ export default async function SignInPage() {
         <SignInForm />
 
         <details className="auth-demo">
-          <summary>Demo accounts for all eight departments</summary>
+          <summary>Demo accounts for all seven departments</summary>
           <table className="demo-table">
             <thead>
               <tr>

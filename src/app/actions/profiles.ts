@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/data/store";
-import type { Farmer, PwdProfile, Shg, ShgMember, SavingsTransaction, PwdFollowup } from "@/lib/data/types";
+import type { Farmer, PwdProfile, Shg, ShgMember, SavingsTransaction, PwdFollowup, RecordStatus } from "@/lib/data/types";
 import {
   canCreateFarmer,
   canEditFarmer,
@@ -61,6 +61,10 @@ export async function saveFarmerProfile(
     farmingType: (String(formData.get("farmingType") ?? "") as any) || "",
     organicStatus: (String(formData.get("organicStatus") ?? "") as any) || "",
     irrigationSource: String(formData.get("irrigationSource") ?? "").trim(),
+    trainingDetails: String(formData.get("trainingDetails") ?? "").trim(),
+    enrolmentDate: String(formData.get("enrolmentDate") ?? "").trim(),
+    farmerGroup: String(formData.get("farmerGroup") ?? "").trim(),
+    status: (String(formData.get("status") ?? "").trim() as RecordStatus) || "active",
     organicPractices: String(formData.get("organicPractices") ?? "").trim(),
     supportReceived: String(formData.get("supportReceived") ?? "").trim(),
     equipmentReceived: String(formData.get("equipmentReceived") ?? "").trim(),
@@ -101,13 +105,16 @@ export async function saveFarmerProfile(
       farmingType: values.farmingType as any,
       organicStatus: values.organicStatus as any,
       irrigationSource: values.irrigationSource,
+      trainingDetails: values.trainingDetails,
+      enrolmentDate: values.enrolmentDate ? new Date(values.enrolmentDate).toISOString() : new Date().toISOString(),
+      farmerGroup: values.farmerGroup || null,
       organicPractices: values.organicPractices,
       supportReceived: values.supportReceived,
       equipmentReceived: values.equipmentReceived,
       gpsLatitude: values.gpsLatitude ? Number(values.gpsLatitude) : null,
       gpsLongitude: values.gpsLongitude ? Number(values.gpsLongitude) : null,
       followupNotes: values.followupNotes,
-      status: "active",
+      status: values.status === "inactive" ? "inactive" : "active",
       crops: values.crops,
     };
 
@@ -134,12 +141,16 @@ export async function saveFarmerProfile(
       farmingType: values.farmingType as any,
       organicStatus: values.organicStatus as any,
       irrigationSource: values.irrigationSource,
+      trainingDetails: values.trainingDetails,
+      enrolmentDate: values.enrolmentDate ? new Date(values.enrolmentDate).toISOString() : current.enrolmentDate,
+      farmerGroup: values.farmerGroup || null,
       organicPractices: values.organicPractices,
       supportReceived: values.supportReceived,
       equipmentReceived: values.equipmentReceived,
       gpsLatitude: values.gpsLatitude ? Number(values.gpsLatitude) : null,
       gpsLongitude: values.gpsLongitude ? Number(values.gpsLongitude) : null,
       followupNotes: values.followupNotes,
+      status: values.status === "inactive" ? "inactive" : "active",
       crops: values.crops,
     };
 
@@ -182,6 +193,13 @@ export async function saveShg(
     villageId: String(formData.get("villageId") ?? "").trim(),
     formationDate: String(formData.get("formationDate") ?? "").trim(),
     meetingFrequency: (String(formData.get("meetingFrequency") ?? "") as any) || "",
+    numberOfMembers: String(formData.get("numberOfMembers") ?? "").trim(),
+    livelihoodActivity: String(formData.get("livelihoodActivity") ?? "").trim(),
+    bankName: String(formData.get("bankName") ?? "").trim(),
+    bankAccountNo: String(formData.get("bankAccountNo") ?? "").trim(),
+    ifscCode: String(formData.get("ifscCode") ?? "").trim(),
+    bankLinkageDate: String(formData.get("bankLinkageDate") ?? "").trim(),
+    supportReceived: String(formData.get("supportReceived") ?? "").trim(),
     projectIds: formData.getAll("projectIds").map(String).filter(Boolean),
   };
 
@@ -206,6 +224,13 @@ export async function saveShg(
       villageId: values.villageId,
       formationDate: values.formationDate,
       meetingFrequency: values.meetingFrequency as any,
+      numberOfMembers: Number(values.numberOfMembers),
+      livelihoodActivity: values.livelihoodActivity,
+      bankName: values.bankName,
+      bankAccountNo: values.bankAccountNo,
+      ifscCode: values.ifscCode,
+      bankLinkageDate: values.bankLinkageDate,
+      supportReceived: values.supportReceived,
       status: "active",
       projectIds: values.projectIds,
     };
@@ -230,6 +255,13 @@ export async function saveShg(
       villageId: values.villageId,
       formationDate: values.formationDate,
       meetingFrequency: values.meetingFrequency as any,
+      numberOfMembers: Number(values.numberOfMembers),
+      livelihoodActivity: values.livelihoodActivity,
+      bankName: values.bankName,
+      bankAccountNo: values.bankAccountNo,
+      ifscCode: values.ifscCode,
+      bankLinkageDate: values.bankLinkageDate,
+      supportReceived: values.supportReceived,
       projectIds: values.projectIds,
     };
 
@@ -282,6 +314,14 @@ export async function addShgMember(formData: FormData) {
     role,
     joinDate,
     status: "active",
+    memberId: String(formData.get("memberId") ?? memberId).trim(),
+    savingsBalance: Number(formData.get("savingsBalance") ?? 0) || 0,
+    totalSavingsToDate: Number(formData.get("totalSavingsToDate") ?? 0) || 0,
+    internalLendingStatus: String(formData.get("internalLendingStatus") ?? "active").trim(),
+    bankLinkageStatus: String(formData.get("bankLinkageStatus") ?? "linked").trim(),
+    loanDetails: String(formData.get("loanDetails") ?? "").trim(),
+    attendanceRecords: String(formData.get("attendanceRecords") ?? "").trim(),
+    trainingRecords: String(formData.get("trainingRecords") ?? "").trim(),
   });
 
   db.audit.push({
@@ -406,6 +446,9 @@ export async function savePwdProfile(
     assistiveDevice: String(formData.get("assistiveDevice") ?? "").trim(),
     individualPlan: String(formData.get("individualPlan") ?? "").trim(),
     outcome: String(formData.get("outcome") ?? "").trim(),
+  familyDetails: String(formData.get("familyDetails") ?? "").trim(),
+  interventionSupport: String(formData.get("interventionSupport") ?? "").trim(),
+  trainingRecords: String(formData.get("trainingRecords") ?? "").trim(),
   };
 
   const fieldErrors = validatePwd(values);
@@ -445,6 +488,9 @@ export async function savePwdProfile(
       assistiveDevice: values.assistiveDevice,
       individualPlan: values.individualPlan,
       outcome: values.outcome,
+      familyDetails: values.familyDetails,
+      interventionSupport: values.interventionSupport,
+      trainingRecords: values.trainingRecords,
       status: "active",
     };
 
@@ -475,6 +521,9 @@ export async function savePwdProfile(
       assistiveDevice: values.assistiveDevice,
       individualPlan: values.individualPlan,
       outcome: values.outcome,
+      familyDetails: values.familyDetails,
+      interventionSupport: values.interventionSupport,
+      trainingRecords: values.trainingRecords,
     };
 
     db.audit.push({

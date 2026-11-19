@@ -11,11 +11,13 @@ const INITIAL: ProfileSaveState = {};
 export function FarmerForm({
   beneficiaryId,
   beneficiaryName,
+  projectNames,
   initialValues,
   cancelHref,
 }: {
   beneficiaryId: string;
   beneficiaryName?: string;
+  projectNames?: string[];
   initialValues?: Partial<FarmerFormValues>;
   cancelHref: string;
 }) {
@@ -81,12 +83,55 @@ export function FarmerForm({
       ) : null}
 
       <div className="form-grid">
-        <div className="field span-2">
+        <p className="form-section-title span-2">1. Profile & Enrolment</p>
+
+        <div className="field">
+          <label className="label" htmlFor="field-farmerCode">
+            Farmer ID
+          </label>
+          <input
+            className="input num"
+            id="field-farmerCode"
+            value={initialValues?.code ?? "Auto-generated on save"}
+            readOnly
+          />
+        </div>
+
+        <div className="field">
           <label className="label">Beneficiary</label>
           <input className="input" type="text" value={beneficiaryName || beneficiaryId} disabled readOnly />
         </div>
 
-        <p className="form-section-title span-2">1. Land Details (PRD §7.4)</p>
+        <div className="field">
+          <label className="label" htmlFor="field-enrolmentDate">
+            Date of enrolment
+          </label>
+          <input
+            className="input"
+            id="field-enrolmentDate"
+            name="enrolmentDate"
+            type="date"
+            defaultValue={
+              String(initialValues?.enrolmentDate ?? "").slice(0, 10) || new Date().toISOString().slice(0, 10)
+            }
+            aria-invalid={state.fieldErrors?.enrolmentDate ? true : undefined}
+          />
+          {state.fieldErrors?.enrolmentDate && <p className="error-text">{state.fieldErrors.enrolmentDate}</p>}
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-projects">
+            Project IDs (via beneficiary)
+          </label>
+          <input
+            className="input"
+            id="field-projects"
+            value={projectNames && projectNames.length > 0 ? projectNames.join(", ") : "No project enrolment"}
+            readOnly
+          />
+        </div>
+
+        <p className="form-section-title span-2">2. Land Details (PRD §7.4)</p>
 
         <div className="field">
           <label className="label" htmlFor="field-landHolding">
@@ -142,7 +187,7 @@ export function FarmerForm({
           />
         </div>
 
-        <p className="form-section-title span-2">2. Agricultural Practices</p>
+        <p className="form-section-title span-2">3. Agricultural Practices</p>
 
         <div className="field">
           <label className="label" htmlFor="field-farmingType">
@@ -192,7 +237,7 @@ export function FarmerForm({
           />
         </div>
 
-        <p className="form-section-title span-2">3. Seasonal Crops (Repeatable Rows)</p>
+        <p className="form-section-title span-2">4. Seasonal Crops (Repeatable Rows)</p>
 
         <div className="field span-2" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {crops.map((c, idx) => (
@@ -264,7 +309,7 @@ export function FarmerForm({
           )}
         </div>
 
-        <p className="form-section-title span-2">4. Support & Equipment</p>
+        <p className="form-section-title span-2">5. Support, Training & Group</p>
 
         <div className="field">
           <label className="label" htmlFor="field-support">
@@ -294,7 +339,35 @@ export function FarmerForm({
           />
         </div>
 
-        <p className="form-section-title span-2">5. Geo-Coordinates (Mobile GPS Capture)</p>
+        <div className="field">
+          <label className="label" htmlFor="field-farmerGroup">
+            Farmer group ID
+          </label>
+          <input
+            className="input"
+            id="field-farmerGroup"
+            name="farmerGroup"
+            type="text"
+            placeholder="e.g. FGRP-04"
+            defaultValue={initialValues?.farmerGroup ?? ""}
+          />
+        </div>
+
+        <div className="field span-2">
+          <label className="label" htmlFor="field-training">
+            Training details
+          </label>
+          <textarea
+            className="input"
+            id="field-training"
+            name="trainingDetails"
+            rows={2}
+            defaultValue={initialValues?.trainingDetails ?? ""}
+            placeholder="e.g. Organic certification orientation, bio-input preparation (2 days)"
+          />
+        </div>
+
+        <p className="form-section-title span-2">6. Geo-Coordinates (Mobile GPS Capture)</p>
 
         <div className="field">
           <label className="label" htmlFor="field-lat">
@@ -350,7 +423,7 @@ export function FarmerForm({
           <p className="help">Capture current device latitude & longitude on field visits.</p>
         </div>
 
-        <p className="form-section-title span-2">6. Follow-up Notes</p>
+        <p className="form-section-title span-2">7. Follow-up Notes & Status</p>
 
         <div className="field span-2">
           <label className="label" htmlFor="field-notes">
@@ -364,6 +437,21 @@ export function FarmerForm({
             defaultValue={initialValues?.followupNotes ?? ""}
             placeholder="e.g. Transitioning 1.5 acres to organic vegetables; next visit scheduled in 3 weeks."
           />
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="field-status">
+            Status
+          </label>
+          <select
+            className="input"
+            id="field-status"
+            name="status"
+            defaultValue={String(initialValues?.status || "active")}
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
       </div>
 

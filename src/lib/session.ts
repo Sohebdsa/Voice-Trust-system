@@ -85,8 +85,6 @@ export function landingFor(role: Role): string {
     case "field_staff":
     case "data_entry":
       return "/home";
-    case "hr_admin":
-      return "/dashboard/hr";
     case "finance":
       return "/dashboard/finance";
     case "mel_officer":

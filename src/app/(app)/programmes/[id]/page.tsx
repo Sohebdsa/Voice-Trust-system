@@ -16,7 +16,6 @@ const TABS = [
   { key: "overview", label: "Overview" },
   { key: "projects", label: "Projects" },
   { key: "activities", label: "Activities" },
-  { key: "team", label: "Team" },
 ];
 
 export default async function ProgrammeDetailPage({
@@ -88,9 +87,7 @@ export default async function ProgrammeDetailPage({
               ? detail.projects.length
               : tab.key === "activities"
                 ? detail.activities.length
-                : tab.key === "team"
-                  ? detail.team.length
-                  : undefined,
+                : undefined,
         }))}
       />
 
@@ -114,7 +111,6 @@ export default async function ProgrammeDetailPage({
                   { label: "Projects", value: String(detail.projects.length) },
                   { label: "Active beneficiaries", value: formatNumber(detail.beneficiaries) },
                   { label: "Activities", value: String(detail.activities.length) },
-                  { label: "Team members", value: String(detail.team.length) },
                 ]}
               />
             </section>
@@ -158,27 +154,6 @@ export default async function ProgrammeDetailPage({
                 <p className="empty">
                   <strong>No activities recorded.</strong>
                   <span>Activities added in Step 5 will appear here.</span>
-                </p>
-              }
-            />
-          </section>
-        ) : null}
-
-        {active === "team" ? (
-          <section className="card list-card">
-            <DataTable
-              caption={`Team allocated to ${programme.name}`}
-              columns={[
-                { key: "name", label: "Team member", cell: (row) => row.name },
-                { key: "designation", label: "Designation", cell: (row) => row.designation },
-                { key: "pct", label: "Allocation on this programme", end: true, cell: (row) => `${row.pctTotal}%` },
-              ]}
-              rows={detail.team}
-              href="/employees"
-              empty={
-                <p className="empty">
-                  <strong>Nobody is allocated yet.</strong>
-                  <span>Allocate staff to this programme's projects.</span>
                 </p>
               }
             />

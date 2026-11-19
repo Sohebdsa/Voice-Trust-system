@@ -131,7 +131,12 @@ export interface Beneficiary {
   status: RecordStatus;
   idProofType: "aadhaar" | "voter" | "ration" | "pan" | "other" | null;
   idProofLast4: string | null;
+  alternateContact?: string | null;
+  addressLine?: string | null;
   photoPath?: string | null;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
   projectIds: string[];
   consentGivenOn: string | null;
 }
@@ -145,6 +150,8 @@ export interface Farmer {
   farmingType: "conventional" | "organic" | "mixed";
   organicStatus: "none" | "in_conversion" | "certified";
   irrigationSource: string;
+  trainingDetails?: string;
+  enrolmentDate?: string;
   organicPractices?: string;
   supportReceived?: string;
   equipmentReceived?: string;
@@ -171,6 +178,10 @@ export interface PwdProfile {
   assistiveDevice?: string;
   individualPlan?: string;
   outcome?: string;
+  familyDetails?: string;
+  interventionSupport?: string;
+  trainingRecords?: string;
+  employmentLivelihood?: string;
   status: RecordStatus;
 }
 
@@ -197,6 +208,13 @@ export interface Shg {
   villageId: string;
   formationDate: string;
   meetingFrequency: "weekly" | "fortnightly" | "monthly";
+  numberOfMembers: number;
+  livelihoodActivity: string;
+  bankName: string;
+  bankAccountNo: string;
+  ifscCode: string;
+  bankLinkageDate: string;
+  supportReceived: string;
   status: RecordStatus;
   /** Junction to projects (PRD §4.7 shg_projects). */
   projectIds: string[];
@@ -220,6 +238,14 @@ export interface ShgMember {
   beneficiaryId: string;
   role: "member" | "president" | "secretary" | "treasurer";
   joinDate: string;
+  memberId: string;
+  savingsBalance: number;
+  totalSavingsToDate: number;
+  internalLendingStatus: string;
+  bankLinkageStatus: string;
+  loanDetails: string;
+  attendanceRecords: string;
+  trainingRecords: string;
   status: RecordStatus;
 }
 
@@ -245,6 +271,24 @@ export interface Activity {
   targetParticipants: number;
   status: ActivityStatus;
   expenditure: number | null;
+  location?: string;
+  resourcePersons?: string;
+  outputsResults?: string;
+  noParticipantsReason?: string;
+}
+
+export interface ActivityStaff {
+  activityId: string;
+  employeeId: string;
+}
+
+export interface ActivityAttachment {
+  id: string;
+  activityId: string;
+  /** Filename only — the prototype never holds the org's files. */
+  filePath: string;
+  kind: "photo" | "document";
+  caption: string;
 }
 
 export interface ActivityParticipant {
@@ -259,10 +303,14 @@ export interface Indicator {
   projectId: string;
   name: string;
   unit: string;
+  description?: string;
   baseline: number;
   target: number;
   reportingFrequency: "monthly" | "quarterly" | "half_yearly" | "annual";
+  dataSource?: string;
+  responsibleEmployeeId?: string | null;
   genderDisaggregated: boolean;
+  status: RecordStatus;
 }
 
 export interface IndicatorValue {
@@ -273,6 +321,9 @@ export interface IndicatorValue {
   value: number;
   maleValue: number | null;
   femaleValue: number | null;
+  remarks?: string;
+  enteredBy: string;
+  enteredAt: string;
 }
 
 export interface ProjectAllocation {
@@ -326,7 +377,6 @@ export interface Db {
   programmes: Programme[];
   projects: Project[];
   employees: Employee[];
-  projectAllocations: ProjectAllocation[];
   beneficiaries: Beneficiary[];
   farmers: Farmer[];
   pwdProfiles: PwdProfile[];
@@ -337,10 +387,9 @@ export interface Db {
   savings: SavingsTransaction[];
   activities: Activity[];
   participants: ActivityParticipant[];
+  activityStaff: ActivityStaff[];
+  activityAttachments: ActivityAttachment[];
   indicators: Indicator[];
   indicatorValues: IndicatorValue[];
-  leaveTypes: LeaveType[];
-  leaveRequests: LeaveRequest[];
-  attendance: Attendance[];
   audit: AuditEntry[];
 }

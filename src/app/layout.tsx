@@ -5,7 +5,7 @@ import "@/styles/masters.css";
 
 export const metadata: Metadata = {
   title: "VOICE Trust MIS",
-  description: "Integrated MIS, HRMS and programme management for VOICE Trust (prototype).",
+  description: "Integrated MIS and programme management for VOICE Trust (prototype).",
 };
 
 export const viewport: Viewport = {

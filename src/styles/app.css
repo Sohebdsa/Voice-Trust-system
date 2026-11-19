@@ -63,6 +63,8 @@ ul {
 /* ---------- App frame ---------- */
 .shell {
   min-block-size: 100dvb;
+  max-inline-size: 100vw;
+  overflow-x: hidden;
   padding: 0;
   background: var(--frame);
 }
@@ -71,6 +73,8 @@ ul {
   display: grid;
   grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
   min-block-size: 100dvb;
+  inline-size: 100%;
+  max-inline-size: 100%;
   background: var(--frame);
   border-radius: 0;
   border: none;
@@ -85,6 +89,13 @@ ul {
   padding: var(--s-4) var(--s-3);
   border-inline-end: 1px solid var(--line);
   min-inline-size: 0;
+  /* Fixed, not sticky: the .frame overflow clip breaks sticky, and the sidebar
+     must stay put while the content column scrolls (no sidebar scrollbar). */
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--sidebar-w);
+  overflow: hidden;
 }
 .workspace {
   display: flex;
@@ -129,9 +140,8 @@ ul {
   flex-direction: column;
   gap: var(--s-4);
   flex: 1;
+  /* Fallback only: scrolls on very short windows instead of clipping nav items. */
   overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
 }
 .nav-group-label {
   font-size: var(--fs-12);
@@ -218,45 +228,58 @@ ul {
 .main {
   display: flex;
   flex-direction: column;
+  /* The fixed sidebar leaves flow, so pin content to the second column. */
+  grid-column: 2;
   min-inline-size: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
 }
 .main-body {
-  padding: var(--s-4) var(--s-5) var(--s-6);
+  padding: var(--s-3) var(--s-5) var(--s-6);
   display: flex;
   flex-direction: column;
   gap: var(--s-4);
   container-type: inline-size;
+  inline-size: 100%;
+  box-sizing: border-box;
 }
 .topbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--s-3);
-  padding: var(--s-4) var(--s-5);
+  padding: var(--s-4) var(--s-5) var(--s-3);
+  inline-size: 100%;
+  box-sizing: border-box;
 }
 .greeting {
   font-size: var(--fs-20);
   font-weight: 500;
   letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 .greeting-sub {
   font-size: var(--fs-12);
   color: var(--muted);
+  line-height: 1.4;
 }
 .topbar-actions {
   margin-inline-start: auto;
   display: flex;
   align-items: center;
   gap: var(--s-2);
+  flex-shrink: 0;
 }
 .icon-btn {
-  display: grid;
+  display: inline-grid;
   place-items: center;
-  inline-size: 34px;
-  block-size: 34px;
+  inline-size: 36px;
+  block-size: 36px;
   border-radius: var(--r-control);
   border: 1px solid var(--line);
   background: var(--paper);
   color: var(--muted);
+  flex: none;
 }
 .icon-btn:hover {
   background: var(--panel);
@@ -303,8 +326,11 @@ ul {
 .filterbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--s-2);
   padding: 0 var(--s-5) var(--s-3);
+  inline-size: 100%;
+  box-sizing: border-box;
 }
 .filter-pill {
   display: inline-flex;
@@ -323,6 +349,26 @@ ul {
 }
 .filter-pill span.label {
   color: var(--muted);
+}
+
+/* Filter rows share one line: .input is 100% wide by default, so each control
+   needs its own flex share or every select takes a full row. */
+.filter-form {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--s-2);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+.filter-form .input {
+  flex: 1 1 8rem;
+  inline-size: auto;
+  min-inline-size: 0;
+  font-size: var(--fs-13);
+}
+.filter-form .btn {
+  flex: none;
 }
 
 /* ---------- Cards ---------- */
@@ -951,8 +997,10 @@ ul {
   .frame {
     border-radius: 0;
     border: none;
+    grid-template-columns: 64px minmax(0, 1fr);
   }
   .sidebar {
+    inline-size: 64px;
     padding-inline: var(--s-2);
   }
   .workspace-text,
@@ -991,6 +1039,9 @@ ul {
   .sidebar {
     display: none;
   }
+  .main {
+    grid-column: 1;
+  }
   .topbar {
     padding: var(--s-3) var(--s-4);
   }
@@ -1002,6 +1053,20 @@ ul {
   }
   .chart-row-bottom {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: var(--s-2);
+  }
+  .topbar-lead {
+    inline-size: 100%;
+  }
+  .topbar-actions {
+    inline-size: 100%;
+    justify-content: flex-end;
+    margin-inline-start: 0;
   }
 }
 
@@ -1244,37 +1309,129 @@ ul {
   align-items: center;
   gap: 6px;
   block-size: 30px;
-  padding: 0 8px 0 10px;
+  padding: 0 10px;
   border-radius: var(--r-pill);
   border: 1px solid var(--line);
   background: var(--paper);
   font-size: var(--fs-12);
+  line-height: 1;
   color: var(--ink-soft);
+  cursor: pointer;
+  min-inline-size: 0;
+}
+.filter-field:focus-within {
+  border-color: var(--violet-600);
+  box-shadow: 0 0 0 3px var(--violet-050);
 }
 .filter-field:hover {
   border-color: var(--line-strong);
 }
 .filter-field-label {
   color: var(--muted);
+  font-size: var(--fs-12);
+  line-height: 1;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  white-space: nowrap;
 }
 .filter-select {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   border: none;
   background: transparent;
-  font: inherit;
+  font-family: inherit;
   font-size: var(--fs-12);
-  color: inherit;
+  font-weight: 500;
+  line-height: 1;
+  height: 14px;
+  color: var(--ink);
   padding: 0 2px 0 0;
+  margin: 0;
   max-inline-size: 180px;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 .filter-select:focus-visible {
-  outline: 2px solid var(--violet-600);
-  outline-offset: 2px;
+  outline: none;
 }
 .filter-field svg {
   color: var(--muted);
   pointer-events: none;
+  flex: none;
+  display: inline-block;
+}
+
+/* ---------- Select (plain CSS, no deps) ----------
+   Styled native <select> so it is keyboard-accessible by default.
+   Matches the house design tokens: --r-control, --line-strong, --paper,
+   --ink, --muted, --violet-600, --fs-16, --fs-12. */
+.select-wrap {
+  position: relative;
+  inline-size: 100%;
+}
+.select-trigger {
+  appearance: none;
+  block-size: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  padding: 0 32px 0 var(--s-3);
+  font-size: var(--fs-16);
+  background: var(--paper);
+  color: var(--ink);
+  inline-size: 100%;
+  cursor: pointer;
+}
+.select-trigger:focus-visible {
+  outline: 2px solid var(--violet-600);
+  outline-offset: 2px;
+}
+.select-trigger[aria-invalid="true"] {
+  border-color: var(--negative);
+}
+.select-indicator {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--s-3);
+  translate: 0 -50%;
+  width: var(--s-4);
+  height: var(--s-4);
+  pointer-events: none;
+  color: var(--muted);
+}
+.select-label {
+  display: block;
+  font-size: var(--fs-12);
+  color: var(--ink-soft);
+  font-weight: 500;
+  margin-block-end: var(--s-2);
+}
+.select-clear {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 34px;
+  translate: 0 -50%;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  cursor: pointer;
+  padding: var(--s-1);
+  border-radius: var(--r-pill);
+}
+.select-clear:hover {
+  background: var(--line);
+  color: var(--ink);
+}
+.select-clear:focus-visible {
+  outline: 2px solid var(--violet-600);
+  outline-offset: 2px;
 }
 
 /* ---------- Text overflow ----------

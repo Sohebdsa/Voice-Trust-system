@@ -23,7 +23,7 @@ export type Scope = {
 };
 
 export function scopeForRole(userId: string, role: Role): Scope {
-  if (role === "admin" || role === "mel_officer" || role === "hr_admin" || role === "finance") {
+  if (role === "admin" || role === "mel_officer" || role === "finance") {
     return { programmeIds: null, projectIds: null, villageIds: null };
   }
   const rows = db.userScopes.filter((s) => s.userId === userId);

@@ -230,6 +230,32 @@
   padding: 18px 20px 0;
 }
 
+/* Native modal variant (Modern Web Guidance: dialog). The `display` rules must be
+   scoped, or an unconditional display would show the closed dialog. */
+dialog.drawer {
+  display: none;
+  margin: 0;
+  /* The UA pins a modal dialog with inset: 0, so left: 0 would beat inset-inline-end. */
+  inset-inline-start: auto;
+  border: 0;
+  max-block-size: 100dvh;
+  max-inline-size: none;
+}
+
+dialog.drawer[open] {
+  display: flex;
+}
+
+dialog.drawer::backdrop {
+  background: rgb(20 22 27 / 0.32);
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+dialog.drawer:modal {
+  overscroll-behavior: contain;
+}
+
 .drawer-head {
   display: flex;
   align-items: flex-start;
@@ -313,6 +339,57 @@
 .check input {
   flex: none;
   accent-color: var(--violet-600);
+}
+
+.picker {
+  position: relative;
+}
+
+.picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  block-size: auto;
+  padding-block: 10px;
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--fs-14);
+  text-align: start;
+}
+
+.picker-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.picker-trigger::after {
+  content: "▾";
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.picker[open] > .picker-trigger {
+  border-color: var(--violet-600);
+}
+
+.picker-panel {
+  position: absolute;
+  z-index: 20;
+  inset-inline: 0;
+  margin-block-start: 4px;
+  display: grid;
+  gap: 6px;
+  max-block-size: 220px;
+  overflow: auto;
+  padding: 10px 12px;
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 10%);
+}
+
+.picker-summary {
+  margin-block-start: 6px;
 }
 
 @media (max-width: 560px) {

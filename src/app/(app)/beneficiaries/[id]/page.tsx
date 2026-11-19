@@ -125,17 +125,9 @@ export default async function BeneficiaryDetailPage({
         {tab === "profile" && (
           <section className="card detail-panel">
             {beneficiary.photoPath && (
-              <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "16px" }}>
-                <img
-                  src={beneficiary.photoPath}
-                  alt={beneficiary.fullName}
-                  style={{ width: "72px", height: "72px", borderRadius: "50%", objectFit: "cover", border: "2px solid var(--line)" }}
-                />
-                <div>
-                  <strong>Beneficiary photograph</strong>
-                  <p className="help" style={{ margin: 0 }}>Stored under DPDP consent rules (last updated: {formatDate(beneficiary.enrolmentDate)})</p>
-                </div>
-              </div>
+              <p className="help" style={{ marginBottom: "16px" }}>
+                Photograph on file: <strong>{beneficiary.photoPath}</strong> — file name only, the prototype stores no upload.
+              </p>
             )}
             <h3>Demographic & Registration Facts</h3>
             <Facts
@@ -153,10 +145,22 @@ export default async function BeneficiaryDetailPage({
                     : "Not specified",
                 },
                 { label: "Mobile contact", value: beneficiary.mobile },
+                { label: "Alternate contact", value: beneficiary.alternateContact ?? "Not provided" },
+                { label: "Address line", value: beneficiary.addressLine ?? "Not provided" },
                 {
                   label: "Village & Block",
                   value: village ? `${village.name}, ${village.block} (${village.district})` : "—",
                 },
+                {
+                  label: "Panchayat & State",
+                  value: village ? `${village.panchayat}, ${village.state}` : "—",
+                },
+                { label: "Record status", value: beneficiary.status },
+                {
+                  label: "Created",
+                  value: `${beneficiary.createdBy ?? "—"}${beneficiary.createdAt ? ` · ${formatDate(beneficiary.createdAt)}` : ""}`,
+                },
+                { label: "Last updated", value: beneficiary.updatedAt ? formatDate(beneficiary.updatedAt) : "—" },
                 {
                   label: "ID proof on file",
                   value: beneficiary.idProofLast4
@@ -219,6 +223,10 @@ export default async function BeneficiaryDetailPage({
                       value: farmer.organicStatus.replace("_", " ").toUpperCase(),
                     },
                     { label: "Irrigation source", value: farmer.irrigationSource },
+                    { label: "Farmer group", value: farmer.farmerGroup ?? "Not grouped" },
+                    { label: "Enrolment date", value: farmer.enrolmentDate ? formatDate(farmer.enrolmentDate) : "—" },
+                    { label: "Training details", value: farmer.trainingDetails || "None recorded" },
+                    { label: "Record status", value: farmer.status },
                     { label: "Organic practices", value: farmer.organicPractices || "None specified" },
                     { label: "Support received", value: farmer.supportReceived || "None specified" },
                     { label: "Equipment received", value: farmer.equipmentReceived || "None specified" },
@@ -375,6 +383,9 @@ export default async function BeneficiaryDetailPage({
                     { label: "Assistive device", value: pwd.assistiveDevice || "None on file" },
                     { label: "Individual plan", value: pwd.individualPlan || "None recorded" },
                     { label: "Outcome", value: pwd.outcome || "Pending" },
+                    { label: "Family details", value: pwd.familyDetails || "Not recorded" },
+                    { label: "Intervention support", value: pwd.interventionSupport || "Not recorded" },
+                    { label: "Training records", value: pwd.trainingRecords || "Not recorded" },
                   ]}
                 />
 
@@ -594,6 +605,7 @@ export default async function BeneficiaryDetailPage({
             <FarmerForm
               beneficiaryId={beneficiary.id}
               beneficiaryName={beneficiary.fullName}
+              projectNames={projects.map((p) => p.name)}
               initialValues={
                 farmer
                   ? {
@@ -604,6 +616,11 @@ export default async function BeneficiaryDetailPage({
                       farmingType: farmer.farmingType,
                       organicStatus: farmer.organicStatus,
                       irrigationSource: farmer.irrigationSource,
+                      code: farmer.code,
+                      trainingDetails: farmer.trainingDetails ?? "",
+                      enrolmentDate: (farmer.enrolmentDate ?? "").slice(0, 10),
+                      farmerGroup: farmer.farmerGroup ?? "",
+                      status: farmer.status,
                       organicPractices: farmer.organicPractices ?? "",
                       supportReceived: farmer.supportReceived ?? "",
                       equipmentReceived: farmer.equipmentReceived ?? "",
