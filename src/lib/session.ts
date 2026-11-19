@@ -7,13 +7,18 @@ import type { Profile, Role } from "./data/types";
 const COOKIE_NAME = "vt_session";
 const SESSION_SECONDS = 60 * 60 * 8;
 
-// TD-01: Fail fast in production if the secret is not set.
-if (process.env.NODE_ENV === "production" && !process.env.SESSION_SECRET) {
-  throw new Error("SESSION_SECRET environment variable is required in production.");
+// TD-01: Fail fast in production if the secret is not set. Read lazily so `next build`
+// can collect page data without a runtime secret.
+function secret() {
+  const value = process.env.SESSION_SECRET;
+  if (value) return value;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET environment variable is required in production.");
+  }
+  return "voice-trust-prototype-dev-secret";
 }
-const SECRET = process.env.SESSION_SECRET ?? "voice-trust-prototype-dev-secret";
 
-const sign = (value: string) => createHmac("sha256", SECRET).update(value).digest("base64url");
+const sign = (value: string) => createHmac("sha256", secret()).update(value).digest("base64url");
 
 function createToken(userId: string) {
   const expiresAt = Date.now() + SESSION_SECONDS * 1000;
